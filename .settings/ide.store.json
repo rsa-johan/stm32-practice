@@ -1,0 +1,7 @@
+{
+  "board": "STM32VLDISCOVERY",
+  "device": "STM32F100RBT6B",
+  "core": "Cortex-M3",
+  "order": 0,
+  "toolchain": "GCC"
+}
