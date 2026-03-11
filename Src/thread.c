@@ -34,6 +34,26 @@ static TaskControlBlock *g_currentTask;
 
 static uint32_t g_taskStacks[MAX_TASKS][MAX_STACK_WORDS];
 
+
+static inline void setPSP(uint32_t psp)
+{
+    __asm volatile("msr psp, %0" :: "r"(psp) : "memory");
+}
+
+static inline void setCONTROL(uint32_t control)
+{
+    __asm volatile("msr control, %0" :: "r"(control) : "memory");
+}
+
+static inline void dsb(void)
+{
+    __asm volatile("dsb");
+}
+static inline void isb(void)
+{
+    __asm volatile("isb");
+}
+
 static void scheduleNextTask(void) __attribute__((used));
 static void scheduleNextTask(void)
 {
@@ -55,8 +75,8 @@ void yield(void)
 {
     /* Request a PendSV exception to perform a context switch. */
     SCB_ICSR = SCB_ICSR_PENDSVSET_Msk;
-    __asm volatile("dsb");
-    __asm volatile("isb");
+    dsb();
+    isb();
 }
 
 void SysTick_Handler(void)
@@ -65,7 +85,7 @@ void SysTick_Handler(void)
     SCB_ICSR = SCB_ICSR_PENDSVSET_Msk;
 }
 
-void *endTask(void);
+void *endTask(void) __attribute__((used));
 
 void *createTask(void (*taskFunction)(void *), const char *name, uint16_t stackSize, void *parameters, uint32_t priority)
 {
@@ -121,21 +141,6 @@ void *endTask(void)
     yield();
     for (;;)
         ;
-}
-
-static inline void setPSP(uint32_t psp)
-{
-    __asm volatile("msr psp, %0" :: "r"(psp) : "memory");
-}
-
-static inline void setCONTROL(uint32_t control)
-{
-    __asm volatile("msr control, %0" :: "r"(control) : "memory");
-}
-
-static inline void isb(void)
-{
-    __asm volatile("isb");
 }
 
 void runScheduler(void)
