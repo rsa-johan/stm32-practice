@@ -43,7 +43,6 @@ set(cpu_PARAMS
 # Sources
 set(sources_SRCS
 	${CMAKE_CURRENT_SOURCE_DIR}/Src/main.c
-	${CMAKE_CURRENT_SOURCE_DIR}/Src/thread.c
 )
 
 # Include directories for all compilers
@@ -119,6 +118,8 @@ target_link_libraries(${CMAKE_PROJECT_NAME} ${link_LIBS})
 target_compile_options(${CMAKE_PROJECT_NAME} PRIVATE
     ${cpu_PARAMS}
     ${compiler_OPTS}
+    -fstack-usage
+    # -fcyclomatic-complexity
     -Wall
     -Wextra
     -Wpedantic
@@ -161,6 +162,9 @@ if(CMSIS_Dsecure STREQUAL "Secure")
         -Wl,--out-implib=secure_nsclib.o
     )
 endif()
+
+# Set linker script as a dependency to force re-link if it changes
+set_target_properties(${CMAKE_PROJECT_NAME} PROPERTIES LINK_DEPENDS ${linker_script_SRC})
 
 # Execute post-build to print size, generate hex and bin
 add_custom_command(TARGET ${CMAKE_PROJECT_NAME} POST_BUILD

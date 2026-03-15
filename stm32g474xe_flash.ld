@@ -1,9 +1,10 @@
 /*
 ******************************************************************************
 **
-** @brief       : Linker script for STM32F100xB devices from STM32F1 series
-**                      128KBytes FLASH
-**                      8KBytes RAMEXEC
+** @brief       : Linker script for STM32G474xE devices from STM32G4 series
+**                      512KBytes FLASH
+**                      32KBytes CCMSRAM
+**                      128KBytes RAM
 **
 **                Set heap size, stack size and stack location according
 **                to application requirements.
@@ -18,7 +19,7 @@
 ******************************************************************************
 ** @attention
 **
-** Copyright (c) 2025 STMicroelectronics.
+** Copyright (c) 2026 STMicroelectronics.
 ** All rights reserved.
 **
 ** This software is licensed under terms that can be found in the LICENSE file
@@ -31,15 +32,16 @@
 /* Memories definition */
 MEMORY
 {
-  RAMEXEC    (xrw)    : ORIGIN = 0x20000000,   LENGTH = 8K
-  FLASH    (rx)    : ORIGIN = 0x8000000,   LENGTH = 128K
+  CCMSRAM    (xrw)    : ORIGIN = 0x10000000,   LENGTH = 32K
+  RAM    (xrw)    : ORIGIN = 0x20000000,   LENGTH = 128K
+  FLASH    (rx)    : ORIGIN = 0x8000000,   LENGTH = 512K
 }
 
 /* Entry Point */
 ENTRY(Reset_Handler)
 
 /* Highest address of the user mode stack */
-_estack = ORIGIN(RAMEXEC) + LENGTH(RAMEXEC); /* end of "RAMEXEC" Ram type memory */
+_estack = ORIGIN(RAM) + LENGTH(RAM); /* end of "RAM" Ram type memory */
 
 _Min_Heap_Size = 0x200; /* required amount of heap */
 _Min_Stack_Size = 0x400; /* required amount of stack */
@@ -47,6 +49,7 @@ _Min_Stack_Size = 0x400; /* required amount of stack */
 /* Sections */
 SECTIONS
 {
+
   /* The startup code into "FLASH" Rom type memory */
   .isr_vector :
   {
@@ -64,10 +67,8 @@ SECTIONS
     *(.glue_7)         /* glue arm to thumb code */
     *(.glue_7t)        /* glue thumb to arm code */
     *(.eh_frame)
-
     KEEP (*(.init))
     KEEP (*(.fini))
-
     . = ALIGN(4);
     _etext = .;        /* define a global symbols at end of code */
   } >FLASH
@@ -130,19 +131,15 @@ SECTIONS
   _sidata = LOADADDR(.data);
 
   /* Initialized data section */
-  .data :
+  .data : ALIGN(4)
   {
-    . = ALIGN(4);
     _sdata = .;        /* create a global symbol at data start */
     *(.data)           /* .data sections */
     *(.data*)          /* .data* sections */
     *(.RamFunc)        /* .RamFunc sections */
     *(.RamFunc*)       /* .RamFunc* sections */
-
     . = ALIGN(4);
-    _edata = .;        /* define a global symbol at data end */
-
-  } >RAMEXEC AT> FLASH
+  } >RAM AT> FLASH
 
   .tdata : ALIGN(4)
   {
@@ -151,8 +148,7 @@ SECTIONS
     _edata = .;        /* define a global symbol at data end */
     PROVIDE(__data_end = .);
     PROVIDE(__tdata_end = .);
-  } >RAMEXEC AT> FLASH
-  PROVIDE( __tbss_start = ADDR(.tbss) );
+  } >RAM AT> FLASH
   PROVIDE( __tdata_start = ADDR(.tdata) );
   PROVIDE( __tdata_size = __tdata_end - __tdata_start );
 
@@ -170,13 +166,14 @@ SECTIONS
   /* Uninitialized data section */
   .tbss (NOLOAD) : ALIGN(4)
   {
-    /* This is used by the startup in order to initialize the .bss section */
+    /* This is used by the startup in order to initialize the .bss and .tbss sections */
     _sbss = .;         /* define a global symbol at bss start */
     __bss_start__ = _sbss;
+    PROVIDE( __bss_start = . );
     *(.tbss .tbss.*)
     . = ALIGN(4);
     PROVIDE( __tbss_end = . );
-  } >RAMEXEC
+  } >RAM
   PROVIDE( __tbss_start = ADDR(.tbss) );
   PROVIDE( __tbss_size = __tbss_end - __tbss_start );
   PROVIDE( __tbss_offset = ADDR(.tbss) - ADDR(.tdata) );
@@ -191,19 +188,36 @@ SECTIONS
 
   .bss (NOLOAD) : ALIGN(4)
   {
-    /* This is used by the startup in order to initialize the .bss section */
-    _sbss = .;         /* define a global symbol at bss start */
-    __bss_start__ = _sbss;
     *(.bss)
     *(.bss*)
     *(COMMON)
-
     . = ALIGN(4);
     _ebss = .;         /* define a global symbol at bss end */
     __bss_end__ = _ebss;
-  } >RAMEXEC
+    PROVIDE( __bss_end = . );
+  } >RAM
+  PROVIDE( __bss_size = __bss_end - __bss_start );
+  PROVIDE( __non_tls_bss_start = ADDR(.bss) );
 
-  /* User_heap_stack section, used to check that there is enough "RAMEXEC" Ram  type memory left */
+  _siccmsram = LOADADDR(.ccmsram);
+
+  /* CCM-SRAM section
+  *
+  * IMPORTANT NOTE!
+  * If initialized variables will be placed in this section,
+  * the startup code needs to be modified to copy the init-values.
+  */
+  .ccmsram :
+  {
+    . = ALIGN(4);
+    _sccmsram = .;       /* create a global symbol at ccmsram start */
+    *(.ccmsram)
+    *(.ccmsram*)
+    . = ALIGN(4);
+    _eccmsram = .;       /* create a global symbol at ccmsram end */
+  } >CCMSRAM AT> FLASH
+
+  /* User_heap_stack section, used to check that there is enough "RAM" Ram  type memory left */
   ._user_heap_stack (NOLOAD) :
   {
     . = ALIGN(8);
@@ -212,7 +226,7 @@ SECTIONS
     . = . + _Min_Heap_Size;
     . = . + _Min_Stack_Size;
     . = ALIGN(8);
-  } >RAMEXEC
+  } >RAM
 
   /* Remove information from the compiler libraries */
   /DISCARD/ :

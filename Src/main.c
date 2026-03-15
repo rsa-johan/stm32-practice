@@ -18,6 +18,9 @@
 
 #include <stddef.h>
 #include "thread.h"
+#include "rcc.h"
+#include "gpio.h"
+#include "timer.h"
 
 volatile uint32_t task0Counter = 0;
 volatile uint32_t task1Counter = 0;
@@ -48,8 +51,11 @@ static void task1(void *arg)
 
 int main(void)
 {
+    sys_clock_init();
+    rcc_init();
+    gpio_init();
+
     createTask(task0, "task0", 512, NULL, 1);
-    createTask(task1, "task1", 512, NULL, 1);
 
     runScheduler();
 

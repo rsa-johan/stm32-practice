@@ -1,7 +1,9 @@
 {
-  "board": "STM32VLDISCOVERY",
-  "device": "STM32F100RBT6B",
-  "core": "Cortex-M3",
+  "device": "STM32G474QET6",
+  "core": "Cortex-M4",
   "order": 0,
-  "toolchain": "GCC"
+  "toolchain": "GCC",
+  "source": {
+    "sourceType": "Empty"
+  }
 }

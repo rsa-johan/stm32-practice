@@ -22,14 +22,14 @@ set(cpu_PARAMS ${CPU_FLAGS} ${cpu_PARAMS})
 
 # Linker script
 set(linker_script_SRC ${linker_script_SRC}
-	${CMAKE_CURRENT_SOURCE_DIR}/stm32f100xb_flash.ld
+	${CMAKE_CURRENT_SOURCE_DIR}/stm32g474xe_flash.ld
 )
 
 # Sources
 set(sources_SRCS ${sources_SRCS}
 	${CMAKE_CURRENT_SOURCE_DIR}/Src/syscall.c
 	${CMAKE_CURRENT_SOURCE_DIR}/Src/sysmem.c
-	${CMAKE_CURRENT_SOURCE_DIR}/Src/startup_stm32f100xx.S
+	${CMAKE_CURRENT_SOURCE_DIR}/Src/startup_stm32g474xx.S
 )
 
 # Include directories
@@ -42,7 +42,7 @@ set(include_asm_DIRS ${include_asm_DIRS}
 
 # Symbols definition
 set(symbols_c_SYMB ${symbols_c_SYMB}
-	RTE_DEVICE_STARTUP_STM32F1XX
+	RTE_DEVICE_STARTUP_STM32G4XX
 )
 set(symbols_cxx_SYMB ${symbols_cxx_SYMB}
 )
