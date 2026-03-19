@@ -1,16 +1,19 @@
 #ifndef GPIO_H
 #define GPIO_H
 
+#include <stdint.h>
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 #define GPIO_MODER_OFFSET 0x00U
 #define GPIO_ODR_OFFSET 0x14U
+#define GPIO_BSRR_OFFSET 0x18U
 
 #define GPIO_MODER(port) (*(volatile uint32_t *)((port) + GPIO_MODER_OFFSET))
 #define GPIO_ODR(port) (*(volatile uint32_t *)((port) + GPIO_ODR_OFFSET))
-
+#define GPIO_BSRR(port) (*(volatile uint32_t *)((port) + GPIO_BSRR_OFFSET))
+    
 #define GPIO_BASE 0x48000000U
 #define GPIO_PORTA_OFFSET 0x0000U
 #define GPIO_PORTB_OFFSET 0x0400U
@@ -21,6 +24,8 @@ extern "C" {
 #define GPIO_PORTG_OFFSET 0x1800U
 
 #define GPIO_C2G_RESET_VALUE 0xFFFFFFFFU
+
+typedef uint32_t PinState;
 
 typedef enum GPIO_Port {
     PORTA = GPIO_BASE + GPIO_PORTA_OFFSET,
@@ -60,6 +65,10 @@ typedef enum : uint32_t {
 
 void gpio_init(void);
 void gpio_set_pin_mode(enum GPIO_Port port, enum GPIO_Pin pin, enum PinMode mode);
+void gpio_set_pin_output(enum GPIO_Port port, enum GPIO_Pin pin);
+void gpio_clear_pin_output(enum GPIO_Port port, enum GPIO_Pin pin);
+void atomic_gpio_set_pin_output(enum GPIO_Port port, enum GPIO_Pin pin);
+void atomic_gpio_clear_pin_output(enum GPIO_Port port, enum GPIO_Pin pin);
 
 #ifdef __cplusplus
 }

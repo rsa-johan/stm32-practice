@@ -5,13 +5,39 @@
 extern "C" {
 #endif
 
+#define xTIM_CR_OFFSET 0x000U
+#define xTIM_CNT_OFFSET 0x004U
+#define xTIM_PSC_OFFSET 0x028U
+#define xTIM_ARR_OFFSET 0x02CU
+#define xTIM_DIER_OFFSET 0x0CU
+
+#define TIMER_BASE 0x40000000U
+
+#define TIM_CR(timer) (*(volatile uint32_t *)(TIMER_BASE + (timer) + xTIM_CR_OFFSET))
+#define TIM_CNT(timer) (*(volatile uint32_t *)(TIMER_BASE + (timer) + xTIM_CNT_OFFSET))
+#define TIM_PSC(timer) (*(volatile uint32_t *)(TIMER_BASE + (timer) + xTIM_PSC_OFFSET))
+#define TIM_ARR(timer) (*(volatile uint32_t *)(TIMER_BASE + (timer) + xTIM_ARR_OFFSET))
+#define TIM_DIER(timer) (*(volatile uint32_t *)(TIMER_BASE + (timer) + xTIM_DIER_OFFSET))
+
+#define TIM_DIER_UIE (1U << 0)
+
 typedef enum : uint32_t {
-    DELAY_UNITS_MS = 0,
-    DELAY_UNITS_S = 1
+    TIM_2 = 0x00U,
+    TIM_3 = 0x04U,
+    TIM_4 = 0x08U,
+    TIM_5 = 0x0CU,
+    TIM_6 = 0x10U,
+    TIM_7 = 0x14U
+} timer_t;
+
+typedef enum : uint32_t {
+    DELAY_UNITS_MS = 1,
+    DELAY_UNITS_S = 1000
 } delay_units_t;
 
-void sys_clock_init(void);
+void timer_init(void);
 void delay(uint32_t units, delay_units_t unit);
+void delay_with_interrupt(uint32_t units, delay_units_t unit);
 
 #ifdef __cplusplus
 }

@@ -2,6 +2,8 @@
 #include <stdbool.h>
 #include <stddef.h>
 
+#include "thread.h"
+
 /*
  * Simple cooperative / preemptive round-robin scheduler for Cortex-M3.
  *
@@ -11,29 +13,11 @@
  * - runScheduler() starts SysTick and switches to the first created task.
  */
 
-#define MAX_TASKS 4
-#define MAX_STACK_WORDS 256
-
-/* Cortex-M3 system registers (minimal subset needed for this scheduler) */
-#define SCB_ICSR (*(volatile uint32_t *)0xE000ED04U)
-#define SCB_SHPR3 (*(volatile uint32_t *)0xE000ED20U)
-#define SCB_ICSR_PENDSVSET_Msk (1UL << 28)
-
-#define SYST_CSR (*(volatile uint32_t *)0xE000E010U)
-#define SYST_RVR (*(volatile uint32_t *)0xE000E014U)
-#define SYST_CVR (*(volatile uint32_t *)0xE000E018U)
-
-typedef struct {
-    uint32_t *stackPointer;
-    bool active;
-} TaskControlBlock;
-
 static TaskControlBlock g_tasks[MAX_TASKS];
 static uint32_t g_currentTaskIndex;
 static TaskControlBlock *g_currentTask;
 
 static uint32_t g_taskStacks[MAX_TASKS][MAX_STACK_WORDS];
-
 
 static inline void setPSP(uint32_t psp)
 {

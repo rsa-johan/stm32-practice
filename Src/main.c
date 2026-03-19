@@ -25,9 +25,8 @@
 volatile uint32_t task0Counter = 0;
 volatile uint32_t task1Counter = 0;
 
-static void task0(void *arg)
-{
-    (void)arg;
+static void debugLedRun(void *args) {
+    (void)args;
 
     for (;;) {
         task0Counter++;
