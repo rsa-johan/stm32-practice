@@ -31,21 +31,10 @@ static void debugLedRun(void *args) {
     for (;;) {
         task0Counter++;
         for (volatile uint32_t i = 0; i < 1000; ++i) {
+            delay(300, DELAY_UNITS_MS);
         }
-        yield();
     }
-}
-
-static void task1(void *arg)
-{
-    (void)arg;
-
-    for (;;) {
-        task1Counter++;
-        for (volatile uint32_t i = 0; i < 1000; ++i) {
-        }
-        yield();
-    }
+    yield();
 }
 
 int main(void)
@@ -54,7 +43,7 @@ int main(void)
     rcc_init();
     gpio_init();
 
-    createTask(task0, "task0", 512, NULL, 1);
+    createTask(debugLedRun, "task0", 512, NULL, 1);
 
     runScheduler();
 

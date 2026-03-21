@@ -20,9 +20,14 @@ extern "C" {
 #define SYST_RVR (*(volatile uint32_t *)0xE000E014U)
 #define SYST_CVR (*(volatile uint32_t *)0xE000E018U)
 
+typedef uint32_t TaskIndex;
+
 typedef struct {
     uint32_t *stackPointer;
     bool active;
+    bool suspended;
+    uint32_t priority;
+    const char *name;
 } TaskControlBlock;
 
 
@@ -30,7 +35,9 @@ void yield(void);
 
 void *createTask(void (*taskFunction)(void *), const char *name, uint16_t stackSize, void *parameters, uint32_t priority);
 
+void interruptTask(void);
 void runScheduler(void);
+void resumeTask(TaskIndex index);
 
 #ifdef __cplusplus
 }

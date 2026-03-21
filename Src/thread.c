@@ -14,7 +14,7 @@
  */
 
 static TaskControlBlock g_tasks[MAX_TASKS];
-static uint32_t g_currentTaskIndex;
+static TaskIndex g_currentTaskIndex;
 static TaskControlBlock *g_currentTask;
 
 static uint32_t g_taskStacks[MAX_TASKS][MAX_STACK_WORDS];
@@ -107,6 +107,9 @@ void *createTask(void (*taskFunction)(void *), const char *name, uint16_t stackS
 
             g_tasks[i].stackPointer = stackTop;
             g_tasks[i].active = true;
+            g_tasks[i].suspended = false;
+            g_tasks[i].priority = priority;
+            g_tasks[i].name = name;
 
             return &g_tasks[i];
         }
@@ -119,6 +122,7 @@ void *endTask(void)
 {
     if (g_currentTask != NULL) {
         g_currentTask->active = false;
+        g_currentTask->suspended = false;
     }
 
     /* Switch to next task; this function should never return. */
@@ -127,11 +131,34 @@ void *endTask(void)
         ;
 }
 
+TaskIndex getCurrentTaskIndex(void)
+{
+    return g_currentTaskIndex;
+}
+
+void interruptTask()
+{
+    if (g_currentTask != NULL) {
+        g_currentTask->active = true;
+        g_currentTask->suspended = true;
+    }
+    yield();
+}
+
+void resumeTask(TaskIndex index)
+{
+    if (index < MAX_TASKS && g_tasks[index].suspended) {
+        g_tasks[index].suspended = false;
+        g_tasks[index].active = true;
+    }
+    yield();
+}
+
 void runScheduler(void)
 {
     /* Find first active task. */
     g_currentTaskIndex = 0;
-    while (g_currentTaskIndex < MAX_TASKS && !g_tasks[g_currentTaskIndex].active) {
+    while (g_currentTaskIndex < MAX_TASKS && !g_tasks[g_currentTaskIndex].active && g_tasks[g_currentTaskIndex].suspended) {
         g_currentTaskIndex++;
     }
     if (g_currentTaskIndex >= MAX_TASKS) {
