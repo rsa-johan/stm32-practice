@@ -27,7 +27,7 @@ extern "C" {
 
 typedef uint32_t PinState;
 
-typedef enum GPIO_Port {
+typedef enum {
     PORTA = GPIO_BASE + GPIO_PORTA_OFFSET,
     PORTB = GPIO_BASE + GPIO_PORTB_OFFSET,
     PORTC = GPIO_BASE + GPIO_PORTC_OFFSET,
@@ -37,7 +37,7 @@ typedef enum GPIO_Port {
     PORTG = GPIO_BASE + GPIO_PORTG_OFFSET
 } GPIO_Port;
 
-typedef enum : unint32_t {
+typedef enum {
     PIN_0 = 0,
     PIN_1 = 1,
     PIN_2 = 2,
@@ -56,7 +56,7 @@ typedef enum : unint32_t {
     PIN_15 = 15
 } GPIO_Pin;
 
-typedef enum : uint32_t {
+typedef enum {
     INPUT = 0x00U,
     OUTPUT = 0x01U,
     ALTERNATE_FUNCTION = 0x02U,
@@ -64,11 +64,12 @@ typedef enum : uint32_t {
 } PinMode;
 
 void gpio_init(void);
-void gpio_set_pin_mode(enum GPIO_Port port, enum GPIO_Pin pin, enum PinMode mode);
-void gpio_set_pin_output(enum GPIO_Port port, enum GPIO_Pin pin);
-void gpio_clear_pin_output(enum GPIO_Port port, enum GPIO_Pin pin);
-void atomic_gpio_set_pin_output(enum GPIO_Port port, enum GPIO_Pin pin);
-void atomic_gpio_clear_pin_output(enum GPIO_Port port, enum GPIO_Pin pin);
+void gpio_set_pin_mode(GPIO_Port port, GPIO_Pin pin, PinMode mode);
+void gpio_set_pin_status(GPIO_Port port, GPIO_Pin pin);
+void gpio_set_pin_output(GPIO_Port port, GPIO_Pin pin);
+void gpio_clear_pin_output(GPIO_Port port, GPIO_Pin pin);
+void atomic_gpio_set_pin_output(GPIO_Port port, GPIO_Pin pin);
+void atomic_gpio_clear_pin_output(GPIO_Port port, GPIO_Pin pin);
 
 #ifdef __cplusplus
 }

@@ -17,21 +17,22 @@
  */
 
 #include <stddef.h>
+#include <stdint.h>
+#include "led.h"
 #include "thread.h"
 #include "rcc.h"
 #include "gpio.h"
 #include "timer.h"
 
-volatile uint32_t task0Counter = 0;
-volatile uint32_t task1Counter = 0;
-
+static void debugLedRun(void *args);
 static void debugLedRun(void *args) {
     (void)args;
 
     for (;;) {
-        task0Counter++;
         for (volatile uint32_t i = 0; i < 1000; ++i) {
-            delay(300, DELAY_UNITS_MS);
+            led_on(LedPort1, LED1);
+            delay(2000, DELAY_UNITS_MS);
+            led_off(LedPort1, LED1);
         }
     }
     yield();
@@ -39,11 +40,14 @@ static void debugLedRun(void *args) {
 
 int main(void)
 {
+    uint32_t STACK_SIZE = 256;
+    /*
     sys_clock_init();
+    */
     rcc_init();
     gpio_init();
 
-    createTask(debugLedRun, "task0", 512, NULL, 1);
+    createTask(debugLedRun, "task0", STACK_SIZE, NULL, 1);
 
     runScheduler();
 

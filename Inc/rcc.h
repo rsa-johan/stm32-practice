@@ -23,7 +23,7 @@ extern "C" {
 #define RCC_GPIO_MASK(port) ((uint32_t)(1U << (port)))
 #define RCC_TIMER_MASK(timer) ((uint32_t)(1U << (timer)))
 
-enum RCC_GPIO_Bit {
+typedef enum {
     RCC_NONE = 0,
     RCC_GPIO_A = 1,
     RCC_GPIO_B = 2,
@@ -32,22 +32,16 @@ enum RCC_GPIO_Bit {
     RCC_GPIO_E = 5,
     RCC_GPIO_F = 6,
     RCC_GPIO_G = 7,
-};
+} RCC_GPIO_Bit;
 
-enum RCC_TIMER_Bit {
+typedef enum {
     RCC_TIM_2 = 0,
     RCC_TIM_3 = 1,
     RCC_TIM_4 = 2,
     RCC_TIM_5 = 3,
     RCC_TIM_6 = 4,
     RCC_TIM_7 = 5,
-};
-
-static void RCC_ResetPeripheral(enum RCC_Peripheral periph);
-static void RCC_ResetTimer(enum RCC_TIMER_Bit timer);
-
-static void RCC_EnablePeripheralClock(enum RCC_Peripheral periph);
-static void RCC_EnableTimerClock(enum RCC_TIMER_Bit timer);
+} RCC_TIMER_Bit;
 
 void rcc_init(void);
 

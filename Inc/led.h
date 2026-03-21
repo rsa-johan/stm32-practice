@@ -8,12 +8,12 @@ extern "C" {
 #include <stdint.h>
 #include "gpio.h"
 
-typedef enum : GPIO_Port {
+typedef enum {
     LedPort1 = PORTG,
     LedPort2 = PORTF,
 } LedPort;
 
-typedef enum : GPIO_Pin {
+typedef enum {
     LED1 = PIN_9,
     LED2 = PIN_11,
 } LedPin;

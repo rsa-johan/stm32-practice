@@ -25,7 +25,7 @@ extern "C" {
 #define TIM_DIER_UIE (1U << 0)
 #define TIM_SR_UIF (1U << 6)
 
-typedef enum : uint32_t {
+typedef enum {
     TIM_2 = 0x00U,
     TIM_3 = 0x04U,
     TIM_4 = 0x08U,
@@ -34,15 +34,13 @@ typedef enum : uint32_t {
     TIM_7 = 0x14U
 } timer_t;
 
-typedef enum : uint32_t {
+typedef enum {
     DELAY_UNITS_MS = 1,
     DELAY_UNITS_S = 1000
 } delay_units_t;
 
 void timer_init(void);
 void delay(uint32_t units, delay_units_t unit);
-void delay_with_interrupt(uint32_t units, delay_units_t unit);
-inline void clearUpdateInterruptFlag(timer_t timer);
 
 #ifdef __cplusplus
 }

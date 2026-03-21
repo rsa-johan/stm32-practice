@@ -1,4 +1,11 @@
 /* rcc.c - RCC (Reset and Clock Control) implementation for STM32 microcontroller. */
+#include "rcc.h"
+
+static void RCC_ResetPeripheral(enum RCC_Peripheral periph);
+static void RCC_ResetTimer(enum RCC_TIMER_Bit timer);
+
+static void RCC_EnablePeripheralClock(enum RCC_Peripheral periph);
+static void RCC_EnableTimerClock(enum RCC_TIMER_Bit timer);
 
 static void RCC_ResetPeripheral(enum RCC_Peripheral periph)
 {

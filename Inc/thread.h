@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include <stddef.h>
+#include <stdbool.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -22,7 +23,7 @@ extern "C" {
 
 typedef uint32_t TaskIndex;
 
-typedef struct {
+typedef struct TaskControlBlock{
     uint32_t *stackPointer;
     bool active;
     bool suspended;

@@ -10,7 +10,7 @@ extern "C" {
 #define NVIC_ISER(bit) (*((volatile uint32_t *)(NVIC_ISER_BASE + (bit >> 3))))
 #define NVIC_ISER_MASK(bit) (0x1U << bit)
 
-typedef enum : uint32_t {
+typedef enum {
     NVIC_IRQ_TIM2 = 28,
     NVIC_IRQ_TIM3 = 29,
     NVIC_IRQ_TIM4 = 30,
