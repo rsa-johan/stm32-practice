@@ -1,7 +1,6 @@
 #include "thread.h"
 #include "timer.h"
 #include "nvic.h"
-#include <cstdint>
 
 inline void clear_update_interrupt_flag(timer_t timer)
 {

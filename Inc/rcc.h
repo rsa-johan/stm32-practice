@@ -5,6 +5,8 @@
 extern "C" {
 #endif
 
+#include <stdint.h>
+
 #define RCC_BASE (*(volatile uint32_t *)0X40021000U)
 
 #define RCC_AHB2_RST_OFFSET 0x2CU
@@ -17,8 +19,8 @@ extern "C" {
 #define RCC_AHB2_RST (*(volatile uint32_t *)(RCC_BASE + RCC_AHB2_RST_OFFSET))
 #define RCC_AHB2_CLK_EN (*(volatile uint32_t *)(RCC_BASE + RCC_AHB2_CLK_EN_OFFSET))
 
-#define RCC_APB2_RST (*(volatile uint32_t *)(RCC_BASE + RCC_APB1_RST_OFFSET))
-#define RCC_APB2_CLK_EN (*(volatile uint32_t *)(RCC_BASE + RCC_APB1_CLK_EN_OFFSET))
+#define RCC_APB1_RST (*(volatile uint32_t *)(RCC_BASE + RCC_APB1_RST_OFFSET))
+#define RCC_APB1_CLK_EN (*(volatile uint32_t *)(RCC_BASE + RCC_APB1_CLK_EN_OFFSET))
 
 #define RCC_GPIO_MASK(port) ((uint32_t)(1U << (port)))
 #define RCC_TIMER_MASK(timer) ((uint32_t)(1U << (timer)))

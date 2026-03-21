@@ -39,6 +39,7 @@ void *createTask(void (*taskFunction)(void *), const char *name, uint16_t stackS
 void interruptTask(void);
 void runScheduler(void);
 void resumeTask(TaskIndex index);
+TaskIndex getCurrentTaskIndex(void);
 
 #ifdef __cplusplus
 }

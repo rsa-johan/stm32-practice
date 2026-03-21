@@ -65,11 +65,12 @@ typedef enum {
 
 void gpio_init(void);
 void gpio_set_pin_mode(GPIO_Port port, GPIO_Pin pin, PinMode mode);
-void gpio_set_pin_status(GPIO_Port port, GPIO_Pin pin);
 void gpio_set_pin_output(GPIO_Port port, GPIO_Pin pin);
 void gpio_clear_pin_output(GPIO_Port port, GPIO_Pin pin);
 void atomic_gpio_set_pin_output(GPIO_Port port, GPIO_Pin pin);
 void atomic_gpio_clear_pin_output(GPIO_Port port, GPIO_Pin pin);
+
+PinState gpio_pin_status(GPIO_Port port, GPIO_Pin pin);
 
 #ifdef __cplusplus
 }

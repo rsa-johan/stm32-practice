@@ -1,30 +1,30 @@
 /* rcc.c - RCC (Reset and Clock Control) implementation for STM32 microcontroller. */
 #include "rcc.h"
 
-static void RCC_ResetPeripheral(enum RCC_Peripheral periph);
-static void RCC_ResetTimer(enum RCC_TIMER_Bit timer);
+static void RCC_ResetPeripheral(RCC_GPIO_Bit periph);
+static void RCC_ResetTimer(RCC_TIMER_Bit timer);
 
-static void RCC_EnablePeripheralClock(enum RCC_Peripheral periph);
-static void RCC_EnableTimerClock(enum RCC_TIMER_Bit timer);
+static void RCC_EnablePeripheralClock(RCC_GPIO_Bit periph);
+static void RCC_EnableTimerClock(RCC_TIMER_Bit timer);
 
-static void RCC_ResetPeripheral(enum RCC_Peripheral periph)
+static void RCC_ResetPeripheral(RCC_GPIO_Bit periph)
 {
     RCC_AHB2_RST |= RCC_GPIO_MASK(periph);
     RCC_AHB2_RST &= ~RCC_GPIO_MASK(periph);
 }
 
-static void RCC_ResetTimer(enum RCC_TIMER_Bit timer)
+static void RCC_ResetTimer(RCC_TIMER_Bit timer)
 {
     RCC_APB1_RST |= (1U << timer);
     RCC_APB1_RST &= ~(1U << timer);
 }
 
-static void RCC_EnablePeripheralClock(enum RCC_Peripheral periph)
+static void RCC_EnablePeripheralClock(RCC_GPIO_Bit periph)
 {
     RCC_AHB2_CLK_EN |= RCC_GPIO_MASK(periph);
 }
 
-static void RCC_EnableTimerClock(enum RCC_TIMER_Bit timer)
+static void RCC_EnableTimerClock(RCC_TIMER_Bit timer)
 {
     RCC_APB1_CLK_EN |= (1U << timer);
 }
