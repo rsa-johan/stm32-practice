@@ -63,7 +63,7 @@ void yield(void)
     isb();
 }
 
-void SysTick_Handler(void)
+__attribute__((interrupt)) void SysTick_Handler(void)
 {
     /* Trigger PendSV to perform a context switch on SysTick. */
     SCB_ICSR = SCB_ICSR_PENDSVSET_Msk;
@@ -172,7 +172,7 @@ void runScheduler(void)
     shpr3 &= ~((0xFFUL << 16) | (0xFFUL << 24));
     shpr3 |= (0xFFUL << 16); /* PendSV lowest */
     shpr3 |= (0xFEUL << 24); /* SysTick slightly higher */
-    SCB_SHPR3 = shpr3;
+    SCB_SHPR3 |= shpr3;
 
     /* Configure SysTick (adjust reload for your core clock). */
     const uint32_t reload = 72000U - 1U; /* ~1ms tick for 72MHz */

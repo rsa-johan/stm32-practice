@@ -2,14 +2,14 @@
 #include "timer.h"
 #include "nvic.h"
 
-inline void clear_update_interrupt_flag(timer_t timer)
+static inline void clear_update_interrupt_flag(timer_t timer)
 {
     if (TIM_SR(timer) & TIM_SR_UIF) {
         TIM_SR(timer) &= ~TIM_SR_UIF;
     }
 }
 
-inline nvic_irq_t get_nvic_from_timer(timer_t timer)
+static inline nvic_irq_t get_nvic_from_timer(timer_t timer)
 {
     switch (timer) {
         case TIM_2:
@@ -25,20 +25,20 @@ inline nvic_irq_t get_nvic_from_timer(timer_t timer)
     }
 }
 
-inline void disable_timer_interrupt(timer_t timer)
+static inline void disable_timer_interrupt(timer_t timer)
 {
     clear_update_interrupt_flag(timer);
     TIM_DIER(timer) &= ~TIM_DIER_UIE;
     TIM_CNT(timer) &= ~TIM_CR_CEN;
 }
 
-inline void enable_timer_interrupt(timer_t timer)
+static inline void enable_timer_interrupt(timer_t timer)
 {
     TIM_DIER(timer) |= TIM_DIER_UIE;
     TIM_CNT(timer) |= TIM_CR_CEN;
 }
 
-inline timer_t get_timer_from_task_index(TaskIndex index)
+static inline timer_t get_timer_from_task_index(TaskIndex index)
 {
     switch (index) {
         case 0:
@@ -80,28 +80,28 @@ void timer_init(void)
     NVIC_ISER(NVIC_IRQ_TIM5) |= (uint32_t)NVIC_ISER_MASK(NVIC_IRQ_TIM5);
 }
 
-void TIM2_IRQHandler(void)
+__attribute__((interrupt)) void TIM2_IRQHandler(void)
 {
     timer_t timer = TIM_2;
     disable_timer_interrupt(timer);
     resumeTask((TaskIndex)0);
 }
 
-void TIM3_IRQHandler(void)
+__attribute__((interrupt)) void TIM3_IRQHandler(void)
 {
     timer_t timer = TIM_3;
     disable_timer_interrupt(timer);
     resumeTask((TaskIndex)1);
 }
 
-void TIM4_IRQHandler(void)
+__attribute__((interrupt)) void TIM4_IRQHandler(void)
 {
     timer_t timer = TIM_4;
     disable_timer_interrupt(timer);
     resumeTask((TaskIndex)2);
 }
 
-void TIM5_IRQHandler(void)
+__attribute__((interrupt)) void TIM5_IRQHandler(void)
 {
     timer_t timer = TIM_5;
     disable_timer_interrupt(timer);
