@@ -46,6 +46,7 @@ int main(void)
     sys_init();
     rcc_init();
     gpio_init();
+    led_init();
 
     /*
     createTask(debugLedRun, "task0", STACK_SIZE, NULL, 1);
