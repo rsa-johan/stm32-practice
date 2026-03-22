@@ -9,15 +9,19 @@ static inline void gpio_reset(GPIO_Port port, GPIO_Pin pin)
 
 void gpio_init(void)
 {
-    gpio_set_pin_mode(PORTG, PIN_9, OUTPUT); /* Set PG9 as output */
+    gpio_set_pin_mode(PORTG, PIN_9, OUTPUT, PUSH_PULL, PULL_UP); /* Set PG9 as output */
 }
 
-void gpio_set_pin_mode(GPIO_Port port, GPIO_Pin pin, PinMode mode)
+void gpio_set_pin_mode(GPIO_Port port, GPIO_Pin pin, PinMode mode, PinOutputType outputType, PullUpPullDown pupd)
 {
     /* Implement GPIO pin set here. */
     gpio_reset(port, pin);
     GPIO_MODER(port) |= (mode << (pin << 1));
-    uint32_t pinMode = (GPIO_MODER(port) >> (pin << 1)) & 0x03U; /* Get the current mode of the pin */
+    GPIO_OTYPER(port) &= ~(outputType << pin); 
+    GPIO_PUPDR(port) |= (pupd << (pin << 1));
+    volatile uint32_t pinMode = (GPIO_MODER(port) >> (pin << 1)) & 0x03U;
+    volatile uint32_t pinType = (GPIO_OTYPER(port) >> pin) & 0x01U;
+    volatile uint32_t pinPupd = (GPIO_PUPDR(port) >> (pin << 1)) & 0x03U;
 }
 
 

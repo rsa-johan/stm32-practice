@@ -54,6 +54,6 @@ int main(void)
     runScheduler();
     */
 
-    led_on(LedPort1, LED1);
+    //led_on(LedPort1, LED1);
     for(;;);
 }

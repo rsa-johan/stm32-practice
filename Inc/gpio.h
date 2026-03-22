@@ -9,10 +9,14 @@ extern "C" {
 #define GPIO_MODER_OFFSET 0x00U
 #define GPIO_ODR_OFFSET 0x14U
 #define GPIO_BSRR_OFFSET 0x18U
+#define GPIO_OTYPER_OFFSET 0x04U
+#define GPIO_PUPDR_OFFSET 0x0CU
 
 #define GPIO_MODER(port) (*(volatile uint32_t *)((port) + GPIO_MODER_OFFSET))
 #define GPIO_ODR(port) (*(volatile uint32_t *)((port) + GPIO_ODR_OFFSET))
 #define GPIO_BSRR(port) (*(volatile uint32_t *)((port) + GPIO_BSRR_OFFSET))
+#define GPIO_OTYPER(port) (*(volatile uint32_t *)((port) + GPIO_OTYPER_OFFSET))
+#define GPIO_PUPDR(port) (*(volatile uint32_t *)((port) + GPIO_PUPDR_OFFSET))
     
 #define GPIO_BASE 0x48000000U
 #define GPIO_PORTA_OFFSET 0x0000U
@@ -63,8 +67,19 @@ typedef enum {
     ANALOG = 0x03U
 } PinMode;
 
+typedef enum {
+    PUSH_PULL = 0x00U,
+    OPEN_DRAIN = 0x01U
+} PinOutputType;
+
+typedef enum {
+    NO_PULL = 0x00U,
+    PULL_UP = 0x01U,
+    PULL_DOWN = 0x02U
+} PullUpPullDown;
+
 void gpio_init(void);
-void gpio_set_pin_mode(GPIO_Port port, GPIO_Pin pin, PinMode mode);
+void gpio_set_pin_mode(GPIO_Port port, GPIO_Pin pin, PinMode mode, PinOutputType outputType, PullUpPullDown pupd);
 void gpio_set_pin_output(GPIO_Port port, GPIO_Pin pin);
 void gpio_clear_pin_output(GPIO_Port port, GPIO_Pin pin);
 void atomic_gpio_set_pin_output(GPIO_Port port, GPIO_Pin pin);
