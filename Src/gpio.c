@@ -1,4 +1,11 @@
 #include "gpio.h"
+#include <stdint.h>
+
+static inline void gpio_reset(GPIO_Port port, GPIO_Pin pin);
+static inline void gpio_reset(GPIO_Port port, GPIO_Pin pin)
+{
+    GPIO_MODER(port) &= ~(0x03U << (pin << 1));
+}
 
 void gpio_init(void)
 {
@@ -8,9 +15,11 @@ void gpio_init(void)
 void gpio_set_pin_mode(GPIO_Port port, GPIO_Pin pin, PinMode mode)
 {
     /* Implement GPIO pin set here. */
-    GPIO_MODER(port) &= (0x03U << (pin << 1)); 
+    gpio_reset(port, pin);
     GPIO_MODER(port) |= (mode << (pin << 1));
+    uint32_t pinMode = (GPIO_MODER(port) >> (pin << 1)) & 0x03U; /* Get the current mode of the pin */
 }
+
 
 PinState gpio_pin_status(GPIO_Port port, GPIO_Pin pin)
 {

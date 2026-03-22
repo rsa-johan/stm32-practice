@@ -18,9 +18,10 @@
 
 #include <stddef.h>
 #include <stdint.h>
+#include "rcc.h"
+#include "sys.h"
 #include "led.h"
 #include "thread.h"
-#include "rcc.h"
 #include "gpio.h"
 #include "timer.h"
 
@@ -41,15 +42,17 @@ static void debugLedRun(void *args) {
 int main(void)
 {
     uint32_t STACK_SIZE = 256;
-    /*
-    sys_clock_init();
-    */
+
+    sys_init();
     rcc_init();
     gpio_init();
 
+    /*
     createTask(debugLedRun, "task0", STACK_SIZE, NULL, 1);
 
     runScheduler();
+    */
 
-    for (;;);
+    led_on(LedPort1, LED1);
+    for(;;);
 }

@@ -31,14 +31,13 @@ extern "C" {
 #define RCC_CR_MASK(bit) ((uint32_t)(1U << (bit)))
 
 typedef enum {
-    RCC_NONE = 0,
-    RCC_GPIO_A = 1,
-    RCC_GPIO_B = 2,
-    RCC_GPIO_C = 3,
-    RCC_GPIO_D = 4,
-    RCC_GPIO_E = 5,
-    RCC_GPIO_F = 6,
-    RCC_GPIO_G = 7,
+    RCC_GPIO_A = 0,
+    RCC_GPIO_B = 1,
+    RCC_GPIO_C = 2,
+    RCC_GPIO_D = 3,
+    RCC_GPIO_E = 4,
+    RCC_GPIO_F = 5,
+    RCC_GPIO_G = 6,
 } RCC_GPIO_Bit;
 
 typedef enum {
