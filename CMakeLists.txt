@@ -48,6 +48,7 @@ set(sources_SRCS
     ${CMAKE_CURRENT_SOURCE_DIR}/Src/thread.c
     ${CMAKE_CURRENT_SOURCE_DIR}/Src/timer.c
     ${CMAKE_CURRENT_SOURCE_DIR}/Src/led.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/Src/sys.c
 )
 
 # Include directories for all compilers

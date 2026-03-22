@@ -53,6 +53,14 @@ static inline timer_t get_timer_from_task_index(TaskIndex index)
             return TIM_2; // Default case
     }
 }
+
+void delay_while(uint32_t units, delay_units_t unit)
+{
+    uint32_t time_units = units * (uint32_t)unit;
+    for (volatile uint32_t i = 0; i < time_units; ++i) {
+        __asm__ volatile ("nop");
+    }
+}
     
 void delay(uint32_t units, delay_units_t unit)
 {

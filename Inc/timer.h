@@ -41,6 +41,7 @@ typedef enum {
 
 void timer_init(void);
 void delay(uint32_t units, delay_units_t unit);
+void delay_while(uint32_t units, delay_units_t unit);
 
 #ifdef __cplusplus
 }

@@ -2,7 +2,6 @@
 #include "rcc.h"
 
 static void sys_clock_init(void);
-
 static void sys_clock_init()
 {
     RCC_ClockSource clockSource = RCC_HSI;
