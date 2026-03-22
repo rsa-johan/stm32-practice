@@ -8,8 +8,8 @@ void gpio_init(void)
 void gpio_set_pin_mode(GPIO_Port port, GPIO_Pin pin, PinMode mode)
 {
     /* Implement GPIO pin set here. */
-    GPIO_MODER(port) &= ~(0x03U << (2 << pin)); /* Clear mode bits for the pin */
-    GPIO_MODER(port) |= (mode << (2 << pin)); /* Set mode bits for the pin */
+    GPIO_MODER(port) &= (0x03U << (pin << 1)); 
+    GPIO_MODER(port) |= (mode << (pin << 1));
 }
 
 PinState gpio_pin_status(GPIO_Port port, GPIO_Pin pin)
@@ -21,13 +21,13 @@ PinState gpio_pin_status(GPIO_Port port, GPIO_Pin pin)
 void gpio_set_pin_output(GPIO_Port port, GPIO_Pin pin)
 {
     /* Implement GPIO pin set here. */
-    GPIO_ODR(port) = (1U << pin); /* Set the pin */
+    GPIO_ODR(port) |= (1U << pin); /* Set the pin */
 }
 
 void gpio_clear_pin_output(GPIO_Port port, GPIO_Pin pin)
 {
     /* Implement GPIO pin clear here. */
-    GPIO_ODR(port) = (0U << pin); /* Clear the pin */
+    GPIO_ODR(port) &= ~(1U << pin); /* Clear the pin */
 }
 
 void atomic_gpio_set_pin_output(GPIO_Port port, GPIO_Pin pin)
