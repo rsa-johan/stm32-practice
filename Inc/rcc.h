@@ -7,7 +7,7 @@ extern "C" {
 
 #include <stdint.h>
 
-#define RCC_BASE (*(volatile uint32_t *)0X40021000U)
+#define RCC_BASE 0X40021000U
 
 #define RCC_CR_OFFSET 0x00U
 #define RCC_CFGR_OFFSET 0x08U
@@ -63,10 +63,10 @@ typedef enum {
 } RCC_HSI_Prescaler;
 
 typedef enum {
-    RCC_SYSCLK_RST_on = 0U << 0,
     RCC_SYSCLK_HSI_on = 1U << 0,
     RCC_SYSCLK_HSE_on = 2U << 0,
     RCC_SYSCLK_PLL_on = 3U << 0,
+    RCC_SYSCLK_RST_on = ~(3U << 0),
 } RCC_SYSCLK_Source;
 
 typedef enum {

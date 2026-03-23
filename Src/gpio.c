@@ -4,24 +4,37 @@
 static inline void gpio_reset(GPIO_Port port, GPIO_Pin pin);
 static inline void gpio_reset(GPIO_Port port, GPIO_Pin pin)
 {
-    GPIO_MODER(port) &= ~(0x03U << (pin << 1));
+    int shift = pin << 1; 
+    GPIO_MODER(port) |= (ANALOG << shift);
+    uint32_t mode = GPIO_MODER(port);
+    (void)mode;
+}
+
+static inline void gpio_set_pupd(GPIO_Port port, GPIO_Pin pin, PinOutputType outputType, PullUpPullDown pupd);
+static inline void gpio_set_pupd(GPIO_Port port, GPIO_Pin pin, PinOutputType outputType, PullUpPullDown pupd)
+{
+    (void)pupd;
+    if (outputType == OPEN_DRAIN) {
+        GPIO_OTYPER(port) |= (1U << pin); 
+    } else {
+        GPIO_OTYPER(port) &= ~(1U << pin); 
+    }
+    uint32_t type = GPIO_OTYPER(port);
+    (void)type;
 }
 
 void gpio_init(void)
 {
-    gpio_set_pin_mode(PORTG, PIN_9, OUTPUT, PUSH_PULL, PULL_UP); /* Set PG9 as output */
+    gpio_set_pin_mode(PORTG, PIN_9, OUTPUT, PUSH_PULL, PULL_DOWN); /* Set PG9 as output */
 }
 
 void gpio_set_pin_mode(GPIO_Port port, GPIO_Pin pin, PinMode mode, PinOutputType outputType, PullUpPullDown pupd)
 {
-    /* Implement GPIO pin set here. */
     gpio_reset(port, pin);
-    GPIO_MODER(port) |= (mode << (pin << 1));
-    GPIO_OTYPER(port) &= ~(outputType << pin); 
-    //GPIO_PUPDR(port) |= (pupd << (pin << 1));
-    volatile uint32_t pinMode = (GPIO_MODER(port) >> (pin << 1)) & 0x03U;
-    volatile uint32_t pinType = (GPIO_OTYPER(port) >> pin) & 0x01U;
-    //volatile uint32_t pinPupd = (GPIO_PUPDR(port) >> (pin << 1)) & 0x03U;
+    GPIO_MODER(port) &= ~((~mode & 0x03) << (pin << 1));
+    uint32_t pinMode = GPIO_MODER(port);
+    (void)pinMode;
+    gpio_set_pupd(port, pin, outputType, pupd);
 }
 
 

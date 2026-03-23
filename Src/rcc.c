@@ -1,30 +1,29 @@
 #include "rcc.h"
-#include "stm32g4xx.h"
 
-static void RCC_ResetPeripheral(RCC_GPIO_Bit periph);
-static void RCC_ResetTimer(RCC_TIMER_Bit timer);
+static void RCC_ResetPeripheral(RCC_GPIO_Port periph);
+static void RCC_ResetTimer(RCC_TIMER_Timer timer);
 
-static void RCC_EnablePeripheralClock(RCC_GPIO_Bit periph);
-static void RCC_EnableTimerClock(RCC_TIMER_Bit timer);
+static void RCC_EnablePeripheralClock(RCC_GPIO_Port periph);
+static void RCC_EnableTimerClock(RCC_TIMER_Timer timer);
 
-static void RCC_ResetPeripheral(RCC_GPIO_Bit periph)
+static void RCC_ResetPeripheral(RCC_GPIO_Port periph)
 {
     RCC_AHB2_RST |= periph;
     RCC_AHB2_RST &= ~periph;
 }
 
-static void RCC_ResetTimer(RCC_TIMER_Bit timer)
+static void RCC_ResetTimer(RCC_TIMER_Timer timer)
 {
     RCC_APB1_RST |= timer;
     RCC_APB1_RST &= ~timer;
 }
 
-static void RCC_EnablePeripheralClock(RCC_GPIO_Bit periph)
+static void RCC_EnablePeripheralClock(RCC_GPIO_Port periph)
 {
     RCC_AHB2_CLK_EN |= periph;
 }
 
-static void RCC_EnableTimerClock(RCC_TIMER_Bit timer)
+static void RCC_EnableTimerClock(RCC_TIMER_Timer timer)
 {
     RCC_APB1_CLK_EN |= timer;
 }

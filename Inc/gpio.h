@@ -68,8 +68,8 @@ typedef enum {
 } PinMode;
 
 typedef enum {
-    PUSH_PULL = 0x00U,
-    OPEN_DRAIN = 0x01U
+    PUSH_PULL = 0,
+    OPEN_DRAIN = 1 
 } PinOutputType;
 
 typedef enum {

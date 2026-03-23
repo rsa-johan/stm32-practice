@@ -8,20 +8,18 @@ extern "C" {
 #include <stdint.h>
 #include "gpio.h"
 
-typedef enum {
-    LedPort1 = PORTG,
-    LedPort2 = PORTF,
-} LedPort;
+typedef struct {
+    GPIO_Port port;
+    GPIO_Pin pin;
+} LedInfo;
 
-typedef enum {
-    LED1 = PIN_9,
-    LED2 = PIN_11,
-} LedPin;
+#define LED1 ((LedInfo){PORTG, PIN_9})
+#define LED2 ((LedInfo){PORTF, PIN_11})
 
 void led_init(void);
-void led_on(LedPort port, LedPin pin);
-void led_off(LedPort port, LedPin pin);
-void led_toggle(LedPort port, LedPin pin);
+void led_on(LedInfo led);
+void led_off(LedInfo led);
+void led_toggle(LedInfo led);
 
 #ifdef __cplusplus
 }

@@ -1,6 +1,7 @@
 #include "thread.h"
 #include "timer.h"
 #include "nvic.h"
+#include <stdint.h>
 
 static inline void clear_update_interrupt_flag(timer_t timer)
 {
@@ -57,9 +58,7 @@ static inline timer_t get_timer_from_task_index(TaskIndex index)
 void delay_while(uint32_t units, delay_units_t unit)
 {
     uint32_t time_units = units * (uint32_t)unit;
-    for (volatile uint32_t i = 0; i < time_units; ++i) {
-        __asm__ volatile ("nop");
-    }
+    while(time_units--);
 }
     
 void delay(uint32_t units, delay_units_t unit)
@@ -77,8 +76,10 @@ void delay(uint32_t units, delay_units_t unit)
 
 void timer_init(void)
 {
-    uint32_t prescaler = 16 - 1;
+    uint32_t prescaler = 16000 - 1;
     TIM_PSC(TIM_2) = prescaler;
+    uint32_t tim2_prescaler = TIM_PSC(TIM_2);
+    (void)tim2_prescaler;
     TIM_PSC(TIM_3) = prescaler;
     TIM_PSC(TIM_4) = prescaler;
     TIM_PSC(TIM_5) = prescaler;
