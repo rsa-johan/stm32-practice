@@ -18,10 +18,10 @@ void gpio_set_pin_mode(GPIO_Port port, GPIO_Pin pin, PinMode mode, PinOutputType
     gpio_reset(port, pin);
     GPIO_MODER(port) |= (mode << (pin << 1));
     GPIO_OTYPER(port) &= ~(outputType << pin); 
-    GPIO_PUPDR(port) |= (pupd << (pin << 1));
+    //GPIO_PUPDR(port) |= (pupd << (pin << 1));
     volatile uint32_t pinMode = (GPIO_MODER(port) >> (pin << 1)) & 0x03U;
     volatile uint32_t pinType = (GPIO_OTYPER(port) >> pin) & 0x01U;
-    volatile uint32_t pinPupd = (GPIO_PUPDR(port) >> (pin << 1)) & 0x03U;
+    //volatile uint32_t pinPupd = (GPIO_PUPDR(port) >> (pin << 1)) & 0x03U;
 }
 
 

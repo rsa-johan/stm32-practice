@@ -1,5 +1,5 @@
-/* rcc.c - RCC (Reset and Clock Control) implementation for STM32 microcontroller. */
 #include "rcc.h"
+#include "stm32g4xx.h"
 
 static void RCC_ResetPeripheral(RCC_GPIO_Bit periph);
 static void RCC_ResetTimer(RCC_TIMER_Bit timer);
@@ -9,24 +9,24 @@ static void RCC_EnableTimerClock(RCC_TIMER_Bit timer);
 
 static void RCC_ResetPeripheral(RCC_GPIO_Bit periph)
 {
-    RCC_AHB2_RST |= RCC_GPIO_MASK(periph);
-    RCC_AHB2_RST &= ~RCC_GPIO_MASK(periph);
+    RCC_AHB2_RST |= periph;
+    RCC_AHB2_RST &= ~periph;
 }
 
 static void RCC_ResetTimer(RCC_TIMER_Bit timer)
 {
-    RCC_APB1_RST |= (1U << timer);
-    RCC_APB1_RST &= ~(1U << timer);
+    RCC_APB1_RST |= timer;
+    RCC_APB1_RST &= ~timer;
 }
 
 static void RCC_EnablePeripheralClock(RCC_GPIO_Bit periph)
 {
-    RCC_AHB2_CLK_EN |= RCC_GPIO_MASK(periph);
+    RCC_AHB2_CLK_EN |= periph;
 }
 
 static void RCC_EnableTimerClock(RCC_TIMER_Bit timer)
 {
-    RCC_APB1_CLK_EN |= (1U << timer);
+    RCC_APB1_CLK_EN |= timer;
 }
 
 void rcc_init(void)

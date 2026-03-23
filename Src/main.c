@@ -48,12 +48,13 @@ int main(void)
     gpio_init();
     led_init();
 
+
     /*
     createTask(debugLedRun, "task0", STACK_SIZE, NULL, 1);
 
     runScheduler();
     */
 
-    //led_on(LedPort1, LED1);
+    led_on(LedPort1, LED1);
     for(;;);
 }
