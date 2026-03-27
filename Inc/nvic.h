@@ -8,7 +8,7 @@ extern "C" {
 #define NVIC_ISER_BASE 0xE000E100
 
 #define NVIC_ISER(bit) (*((volatile uint32_t *)(NVIC_ISER_BASE + ((bit >> 5) << 2))))
-#define NVIC_ISER_MASK(bit) (0x1U << bit)
+#define NVIC_ISER_MASK(bit) (0x1U << (bit & 0x1FU))
 
 typedef enum {
     NVIC_IRQ_TIM2 = 28,

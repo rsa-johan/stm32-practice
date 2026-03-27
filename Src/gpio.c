@@ -25,7 +25,7 @@ static inline void gpio_set_pupd(GPIO_Port port, GPIO_Pin pin, PinOutputType out
 
 void gpio_init(void)
 {
-    gpio_set_pin_mode(PORTG, PIN_9, OUTPUT, PUSH_PULL, PULL_DOWN); /* Set PG9 as output */
+    /* Implement GPIO initialization here. */
 }
 
 void gpio_set_pin_mode(GPIO_Port port, GPIO_Pin pin, PinMode mode, PinOutputType outputType, PullUpPullDown pupd)
@@ -41,7 +41,7 @@ void gpio_set_pin_mode(GPIO_Port port, GPIO_Pin pin, PinMode mode, PinOutputType
 PinState gpio_pin_status(GPIO_Port port, GPIO_Pin pin)
 {
     /* Implement GPIO pin get here. */
-    return (GPIO_ODR(port) & (1U << pin)) >> pin; /* Return the state of the pin */
+    return (PinState)((GPIO_ODR(port) & (1U << pin)) >> pin); /* Return the state of the pin */
 }
 
 void gpio_set_pin_output(GPIO_Port port, GPIO_Pin pin)

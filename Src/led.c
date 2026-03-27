@@ -2,6 +2,8 @@
 #include "gpio.h"
 
 void led_init() {
+    gpio_set_pin_mode(LED1.port, LED1.pin, OUTPUT, PUSH_PULL, PULL_DOWN); 
+    gpio_set_pin_mode(LED2.port, LED2.pin, OUTPUT, PUSH_PULL, PULL_DOWN); 
     led_off(LED1);
     led_off(LED2);
 }
@@ -16,5 +18,5 @@ void led_off(LedInfo led) {
 
 void led_toggle(LedInfo led) {
     PinState pin_state = gpio_pin_status(led.port, led.pin);
-    pin_state ? led_off(led) : led_on(led);
+    pin_state == PIN_HIGH ? led_on(led) : led_off(led);
 }

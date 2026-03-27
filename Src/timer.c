@@ -78,8 +78,6 @@ void timer_init(void)
 {
     uint32_t prescaler = 16000 - 1;
     TIM_PSC(TIM_2) = prescaler;
-    uint32_t tim2_prescaler = TIM_PSC(TIM_2);
-    (void)tim2_prescaler;
     TIM_PSC(TIM_3) = prescaler;
     TIM_PSC(TIM_4) = prescaler;
     TIM_PSC(TIM_5) = prescaler;

@@ -31,8 +31,10 @@ static void RCC_EnableTimerClock(RCC_TIMER_Timer timer)
 void rcc_init(void)
 {
    RCC_ResetPeripheral(RCC_GPIO_G);
+   RCC_ResetPeripheral(RCC_GPIO_F);
    RCC_ResetTimer(RCC_TIM_2);
 
    RCC_EnablePeripheralClock(RCC_GPIO_G); 
+   RCC_EnablePeripheralClock(RCC_GPIO_F); 
    RCC_EnableTimerClock(RCC_TIM_2);
 }

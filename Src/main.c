@@ -25,30 +25,28 @@
 #include "gpio.h"
 #include "timer.h"
 
-static void debugLedRun(void *args);
-static void debugLedRun(void *args) {
+static void LedRun0(void *args);
+static void LedRun1(void *args);
+
+static void LedRun0(void *args) 
+{
     (void)args;
 
-    for (;;) {
-        for (volatile uint32_t i = 0; i < 1000; ++i) {
-            led_on(LED1);
-            delay(2000, DELAY_UNITS_MS);
-            led_off(LED1);
-            delay(2000, DELAY_UNITS_MS);
-        }
+    for(uint32_t i = 0; i < 1000; i++) {
+        led_toggle(LED1);
+        delay(1000, DELAY_UNITS_MS);
     }
     yield();
 }
 
-static void debugReg(void *args);
-static void debugReg(void *args)
+static void LedRun1(void *args)
 {
     (void)args;
-    for (;;) {
-        uint32_t shpr3 = SCB_SHPR3;
-        (void)shpr3; // Suppress unused variable warning
-        yield();
+    for(uint32_t i = 0; i < 1000; i++) {
+        led_toggle(LED2);
+        delay(1000, DELAY_UNITS_MS);
     }
+    yield();
 }
 
 int main(void)
@@ -61,17 +59,10 @@ int main(void)
     led_init();
     timer_init();
 
-    /*
-    createTask(debugLedRun, "task0", STACK_SIZE, NULL, 1);
-    createTask(debugReg, "task1", STACK_SIZE, NULL, 2);
+    createTask(LedRun0, "task0", STACK_SIZE, NULL, 1);
+    createTask(LedRun1, "task1", STACK_SIZE, NULL, 2);
 
     runScheduler();
-    */
 
-    for(;;) {
-        led_on(LED1);
-        delay_while(600, DELAY_UNITS_S);
-        led_off(LED1);
-        delay_while(600, DELAY_UNITS_S);
-    }
+    for(;;);
 }

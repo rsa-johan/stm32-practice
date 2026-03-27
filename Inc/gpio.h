@@ -29,7 +29,6 @@ extern "C" {
 
 #define GPIO_C2G_RESET_VALUE 0xFFFFFFFFU
 
-typedef uint32_t PinState;
 
 typedef enum {
     PORTA = GPIO_BASE + GPIO_PORTA_OFFSET,
@@ -77,6 +76,11 @@ typedef enum {
     PULL_UP = 0x01U,
     PULL_DOWN = 0x02U
 } PullUpPullDown;
+
+typedef enum {
+    PIN_LOW = 0,
+    PIN_HIGH = 1
+} PinState;
 
 void gpio_init(void);
 void gpio_set_pin_mode(GPIO_Port port, GPIO_Pin pin, PinMode mode, PinOutputType outputType, PullUpPullDown pupd);
