@@ -19,8 +19,6 @@ static inline void gpio_set_pupd(GPIO_Port port, GPIO_Pin pin, PinOutputType out
     } else {
         GPIO_OTYPER(port) &= ~(1U << pin); 
     }
-    uint32_t type = GPIO_OTYPER(port);
-    (void)type;
 }
 
 void gpio_init(void)

@@ -25,10 +25,10 @@
 #include "gpio.h"
 #include "timer.h"
 
-static void LedRun0(void *args);
-static void LedRun1(void *args);
+void LedRun0(void *args);
+void LedRun1(void *args);
 
-static void LedRun0(void *args) 
+void LedRun0(void *args) 
 {
     (void)args;
 
@@ -39,7 +39,7 @@ static void LedRun0(void *args)
     yield();
 }
 
-static void LedRun1(void *args)
+void LedRun1(void *args)
 {
     (void)args;
     for(uint32_t i = 0; i < 1000; i++) {
@@ -49,9 +49,17 @@ static void LedRun1(void *args)
     yield();
 }
 
+void temp_callback(void);
+void temp_callback()
+{
+    led_off(LED1);
+    led_on(LED2);
+}
+
 int main(void)
 {
     uint32_t STACK_SIZE = 256;
+    (void)STACK_SIZE;
 
     sys_init();
     rcc_init();
@@ -63,6 +71,4 @@ int main(void)
     createTask(LedRun1, "task1", STACK_SIZE, NULL, 2);
 
     runScheduler();
-
-    for(;;);
 }

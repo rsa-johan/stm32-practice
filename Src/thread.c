@@ -47,7 +47,7 @@ static void scheduleNextTask(void)
 
     for (uint32_t i = 0; i < MAX_TASKS; ++i) {
         uint32_t next = (g_currentTaskIndex + 1U + i) % MAX_TASKS;
-        if (g_tasks[next].active) {
+        if (g_tasks[next].active && !g_tasks[next].suspended) {
             g_currentTaskIndex = next;
             g_currentTask = &g_tasks[next];
             return;
@@ -69,9 +69,8 @@ __attribute__((interrupt)) void SysTick_Handler(void)
     SCB_ICSR = SCB_ICSR_PENDSVSET_Msk;
 }
 
-void *endTask(void) __attribute__((used));
 
-void *createTask(void (*taskFunction)(void *), const char *name, uint16_t stackSize, void *parameters, uint32_t priority)
+void createTask(void (*taskFunction)(void *), const char *name, uint16_t stackSize, void *parameters, uint32_t priority)
 {
     (void)name;
     (void)priority;
@@ -111,14 +110,14 @@ void *createTask(void (*taskFunction)(void *), const char *name, uint16_t stackS
             g_tasks[i].priority = priority;
             g_tasks[i].name = name;
 
-            return &g_tasks[i];
+            return;
         }
     }
 
-    return NULL;
+    return;
 }
 
-void *endTask(void)
+void endTask(void)
 {
     if (g_currentTask != NULL) {
         g_currentTask->active = false;
@@ -127,8 +126,7 @@ void *endTask(void)
 
     /* Switch to next task; this function should never return. */
     yield();
-    for (;;)
-        ;
+    for (;;);
 }
 
 TaskIndex getCurrentTaskIndex(void)
@@ -158,7 +156,7 @@ void runScheduler(void)
 {
     /* Find first active task. */
     g_currentTaskIndex = 0;
-    while (g_currentTaskIndex < MAX_TASKS && !g_tasks[g_currentTaskIndex].active && g_tasks[g_currentTaskIndex].suspended) {
+    while (g_currentTaskIndex < MAX_TASKS && (!g_tasks[g_currentTaskIndex].active || g_tasks[g_currentTaskIndex].suspended)) {
         g_currentTaskIndex++;
     }
     if (g_currentTaskIndex >= MAX_TASKS) {
@@ -168,14 +166,11 @@ void runScheduler(void)
     g_currentTask = &g_tasks[g_currentTaskIndex];
 
     /* Set PendSV and SysTick to lowest priority (lowest preemption priority). */
-    uint32_t shpr3 = SCB_SHPR3;
-    shpr3 &= ~((0xFFUL << 16) | (0xFFUL << 24));
-    shpr3 |= (0xFFUL << 16); /* PendSV lowest */
-    shpr3 |= (0xFEUL << 24); /* SysTick slightly higher */
-    SCB_SHPR3 |= shpr3;
+    SCB_SHPR3 &= ~((0xFFUL << 16) | (0xFFUL << 24));
+    SCB_SHPR3 |= ((0xFFUL << 16) | (0xEFUL << 24));
 
     /* Configure SysTick (adjust reload for your core clock). */
-    const uint32_t reload = 72000U - 1U; /* ~1ms tick for 72MHz */
+    const uint32_t reload = 16000U - 1U; /* ~1ms tick for 16MHz */
     SYST_RVR = reload;
     SYST_CVR = 0U;
     SYST_CSR = (1U << 2) | (1U << 1) | (1U << 0); /* CLKSOURCE=1, TICKINT=1, ENABLE=1 */
