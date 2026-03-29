@@ -34,7 +34,7 @@ void LedRun0(void *args)
 
     for(;;) {
         led_toggle(LED1);
-        delay(3000, DELAY_UNITS_S);
+        delay(3, DELAY_UNITS_S);
     }
     yield();
 }
@@ -44,7 +44,7 @@ void LedRun1(void *args)
     (void)args;
     for(;;) {
         led_toggle(LED2);
-        delay(3000, DELAY_UNITS_MS);
+        delay(3, DELAY_UNITS_S);
     }
     yield();
 }

@@ -5,7 +5,7 @@ void led_init() {
     gpio_set_pin_mode(LED1.port, LED1.pin, OUTPUT, PUSH_PULL, PULL_DOWN); 
     gpio_set_pin_mode(LED2.port, LED2.pin, OUTPUT, PUSH_PULL, PULL_DOWN); 
     led_off(LED1);
-    led_off(LED2);
+    led_on(LED2);
 }
 
 void led_on(LedInfo led) {

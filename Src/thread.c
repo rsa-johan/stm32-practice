@@ -1,8 +1,6 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <stddef.h>
-#include <sys/cdefs.h>
-
 #include "thread.h"
 
 /*
@@ -23,18 +21,6 @@ static uint32_t g_taskStacks[MAX_TASKS][MAX_STACK_WORDS];
 static inline void setPSP(uint32_t psp)
 {
     __asm volatile("msr psp, %0" :: "r"(psp) : "memory");
-}
-
-static inline void __set_CONTROL(uint32_t control)
-{
-    __asm volatile("msr control, %0" :: "r"(control) : "memory");
-}
-
-static inline uint32_t __get_CONTROL(void)
-{
-    uint32_t result;
-    __asm volatile ("mrs %0, control" : "=r" (result) );
-    return(result);
 }
 
 static inline void dsb(void)
@@ -76,34 +62,18 @@ void yield(void)
     isb();
 }
 
-__attribute__((interrupt)) void SVC_Handler(void)
-{
-  __asm volatile(
-    ".global SVC_Handler_Main\n"
-    "TST lr, #4\n"
-    "ITE EQ\n"
-    "MRSEQ r0, MSP\n"
-    "MRSNE r0, PSP\n"
-    "B SVC_Handler_Main\n"
-  );
-}
-
-void SVC_Handler_Main(unsigned int *svc_args)
+__attribute__((naked)) void SVC_Handler(void)
 {
     __asm volatile(
-        "mrs r0, psp\n"
-        "stmdb r0!, {r4-r11}\n"
-        "ldr r1, =g_currentTask\n"
-        "ldr r2, [r1]\n"
-        "str r0, [r2]\n"
-        "push {lr}\n"
-        "bl scheduleNextTask\n"
-        "pop {lr}\n"
         "ldr r1, =g_currentTask\n"
         "ldr r2, [r1]\n"
         "ldr r0, [r2]\n"
         "ldmia r0!, {r4-r11}\n"
         "msr psp, r0\n"
+        "movs r0, #2\n"
+        "msr control, r0\n"
+        "isb\n"
+        "ldr lr, =0xFFFFFFFD\n"
         "bx lr\n"
     );
 }
@@ -222,7 +192,6 @@ void runScheduler(void)
 
     /* Switch to process stack and start the first task. */
     setPSP((uint32_t)g_currentTask->stackPointer);
-    __set_CONTROL(2U); 
     __svc_trigger();
 }
 
