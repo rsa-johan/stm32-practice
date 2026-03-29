@@ -32,9 +32,9 @@ void LedRun0(void *args)
 {
     (void)args;
 
-    for(uint32_t i = 0; i < 1000; i++) {
+    for(;;) {
         led_toggle(LED1);
-        delay(1000, DELAY_UNITS_MS);
+        delay(3000, DELAY_UNITS_S);
     }
     yield();
 }
@@ -42,18 +42,11 @@ void LedRun0(void *args)
 void LedRun1(void *args)
 {
     (void)args;
-    for(uint32_t i = 0; i < 1000; i++) {
+    for(;;) {
         led_toggle(LED2);
-        delay(1000, DELAY_UNITS_MS);
+        delay(3000, DELAY_UNITS_MS);
     }
     yield();
-}
-
-void temp_callback(void);
-void temp_callback()
-{
-    led_off(LED1);
-    led_on(LED2);
 }
 
 int main(void)

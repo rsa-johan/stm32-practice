@@ -65,6 +65,11 @@ static inline void __reinit_cnt(timer_t timer)
     TIM_EGR(timer) |= TIM_EGR_UG;
 }
 
+static inline void __enable_irq(void)
+{
+    __asm volatile("cpsie i");
+}
+
 static inline void __reset_timer(timer_t timer)
 {
     TIM_CNT(timer) = 0;
@@ -83,11 +88,6 @@ static inline void __enable_iser(timer_t timer)
     NVIC_ISER(irq) = (uint32_t)NVIC_ISER_MASK(irq);
 }
 
-static inline void __enable_irq(void)
-{
-    __asm volatile("cpsie i" ::: "memory");
-}
-
 static inline void set_psc(timer_t timer, uint32_t psc_value) 
 {
     TIM_PSC(timer) = psc_value - 1U;
@@ -104,7 +104,7 @@ void delay(uint32_t delay_time, delay_units_t unit)
     timer_t timer = get_timer_from_task_index(currentTaskIndex);
     __reset_timer(timer);
     set_arr(timer,  delay_time * unit);
-    enable_timer_interrupt(TIM_2);
+    enable_timer_interrupt(timer);
     __start_timer(timer);
     interruptTask();
 }
@@ -113,14 +113,32 @@ void timer_init(void)
 {
     // prescaler setup
     set_psc(TIM_2, FREQ_HZ/DELAY_UNITS_MS);
+    set_psc(TIM_3, FREQ_HZ/DELAY_UNITS_MS);
+    set_psc(TIM_4, FREQ_HZ/DELAY_UNITS_MS);
+    set_psc(TIM_5, FREQ_HZ/DELAY_UNITS_MS);
 
     // reset of interrupt, counter and timer
     disable_timer_interrupt(TIM_2);
+    disable_timer_interrupt(TIM_3);
+    disable_timer_interrupt(TIM_4);
+    disable_timer_interrupt(TIM_5);
+
     __reinit_cnt(TIM_2);
+    __reinit_cnt(TIM_3);
+    __reinit_cnt(TIM_4);
+    __reinit_cnt(TIM_5);
+
     __reset_timer(TIM_2);
+    __reset_timer(TIM_3);
+    __reset_timer(TIM_4);
+    __reset_timer(TIM_5);
 
     // enable interrupt in 
     __enable_iser(TIM_2);
+    __enable_iser(TIM_3);
+    __enable_iser(TIM_4);
+    __enable_iser(TIM_5);
+
     __enable_irq();
 }
 

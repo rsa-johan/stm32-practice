@@ -21,6 +21,8 @@ extern "C" {
 #define SYST_RVR (*(volatile uint32_t *)0xE000E014U)
 #define SYST_CVR (*(volatile uint32_t *)0xE000E018U)
 
+#define CONTROL_nPRIV_Msk (1U << 0) 
+
 typedef uint32_t TaskIndex;
 
 typedef struct TaskControlBlock{

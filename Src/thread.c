@@ -1,6 +1,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <stddef.h>
+#include <sys/cdefs.h>
 
 #include "thread.h"
 
@@ -24,9 +25,16 @@ static inline void setPSP(uint32_t psp)
     __asm volatile("msr psp, %0" :: "r"(psp) : "memory");
 }
 
-static inline void setCONTROL(uint32_t control)
+static inline void __set_CONTROL(uint32_t control)
 {
     __asm volatile("msr control, %0" :: "r"(control) : "memory");
+}
+
+static inline uint32_t __get_CONTROL(void)
+{
+    uint32_t result;
+    __asm volatile ("mrs %0, control" : "=r" (result) );
+    return(result);
 }
 
 static inline void dsb(void)
@@ -38,6 +46,11 @@ static inline void isb(void)
     __asm volatile("isb");
 }
 
+static inline void __svc_trigger(void)
+{
+    __asm volatile("SVC #0");
+}
+
 static void scheduleNextTask(void) __attribute__((used));
 static void scheduleNextTask(void)
 {
@@ -46,7 +59,7 @@ static void scheduleNextTask(void)
     }
 
     for (uint32_t i = 0; i < MAX_TASKS; ++i) {
-        uint32_t next = (g_currentTaskIndex + 1U + i) % MAX_TASKS;
+        uint32_t next = (g_currentTaskIndex + i) % MAX_TASKS;
         if (g_tasks[next].active && !g_tasks[next].suspended) {
             g_currentTaskIndex = next;
             g_currentTask = &g_tasks[next];
@@ -61,6 +74,38 @@ void yield(void)
     SCB_ICSR = SCB_ICSR_PENDSVSET_Msk;
     dsb();
     isb();
+}
+
+__attribute__((interrupt)) void SVC_Handler(void)
+{
+  __asm volatile(
+    ".global SVC_Handler_Main\n"
+    "TST lr, #4\n"
+    "ITE EQ\n"
+    "MRSEQ r0, MSP\n"
+    "MRSNE r0, PSP\n"
+    "B SVC_Handler_Main\n"
+  );
+}
+
+void SVC_Handler_Main(unsigned int *svc_args)
+{
+    __asm volatile(
+        "mrs r0, psp\n"
+        "stmdb r0!, {r4-r11}\n"
+        "ldr r1, =g_currentTask\n"
+        "ldr r2, [r1]\n"
+        "str r0, [r2]\n"
+        "push {lr}\n"
+        "bl scheduleNextTask\n"
+        "pop {lr}\n"
+        "ldr r1, =g_currentTask\n"
+        "ldr r2, [r1]\n"
+        "ldr r0, [r2]\n"
+        "ldmia r0!, {r4-r11}\n"
+        "msr psp, r0\n"
+        "bx lr\n"
+    );
 }
 
 __attribute__((interrupt)) void SysTick_Handler(void)
@@ -177,14 +222,8 @@ void runScheduler(void)
 
     /* Switch to process stack and start the first task. */
     setPSP((uint32_t)g_currentTask->stackPointer);
-    setCONTROL(2U); /* Use PSP, stay privileged */
-    isb();
-
-    __asm volatile(
-        "ldr r0, =0xFFFFFFFD\n"
-        "mov lr, r0\n"
-        "bx lr\n"
-    );
+    __set_CONTROL(2U); 
+    __svc_trigger();
 }
 
 __attribute__((naked)) void PendSV_Handler(void)
