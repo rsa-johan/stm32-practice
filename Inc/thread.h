@@ -34,13 +34,20 @@ typedef struct TaskControlBlock{
 } TaskControlBlock;
 
 
-void yield(void);
-
-void createTask(void (*taskFunction)(void *), const char *name, uint16_t stackSize, void *parameters, uint32_t priority);
+//m-level
+void scheduleNextTask(void) __attribute__((used));
 void endTask(void) __attribute__((used));
-void interruptTask(void);
+
+//p-level
+void yield(void);
+void createTask(void (*taskFunction)(void *), const char *name, uint16_t stackSize, void *parameters, uint32_t priority);
 void runScheduler(void);
+
+// timer-level
+void interruptTask(void);
 void resumeTask(TaskIndex index);
+
+//task-utils
 TaskIndex getCurrentTaskIndex(void);
 
 #ifdef __cplusplus

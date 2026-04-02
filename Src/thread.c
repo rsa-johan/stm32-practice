@@ -18,16 +18,16 @@ static TaskControlBlock *g_currentTask;
 
 static uint32_t g_taskStacks[MAX_TASKS][MAX_STACK_WORDS];
 
-static inline void setPSP(uint32_t psp)
+static inline void __set_PSP(uint32_t psp)
 {
     __asm volatile("msr psp, %0" :: "r"(psp) : "memory");
 }
 
-static inline void dsb(void)
+static inline void __dsb(void)
 {
     __asm volatile("dsb");
 }
-static inline void isb(void)
+static inline void __isb(void)
 {
     __asm volatile("isb");
 }
@@ -37,29 +37,17 @@ static inline void __svc_trigger(void)
     __asm volatile("SVC #0");
 }
 
-static void scheduleNextTask(void) __attribute__((used));
-static void scheduleNextTask(void)
+static inline void __trigger_pendsv(void)
 {
-    if (g_currentTask == NULL) {
-        return;
-    }
-
-    for (uint32_t i = 0; i < MAX_TASKS; ++i) {
-        uint32_t next = (g_currentTaskIndex + i) % MAX_TASKS;
-        if (g_tasks[next].active && !g_tasks[next].suspended) {
-            g_currentTaskIndex = next;
-            g_currentTask = &g_tasks[next];
-            return;
-        }
-    }
+    SCB_ICSR = SCB_ICSR_PENDSVSET_Msk;
 }
 
-void yield(void)
+__attribute__((optimize("O3"))) void yield(void)
 {
     /* Request a PendSV exception to perform a context switch. */
-    SCB_ICSR = SCB_ICSR_PENDSVSET_Msk;
-    dsb();
-    isb();
+    __trigger_pendsv();
+    __dsb();
+    __isb();
 }
 
 __attribute__((naked)) void SVC_Handler(void)
@@ -81,7 +69,7 @@ __attribute__((naked)) void SVC_Handler(void)
 __attribute__((interrupt)) void SysTick_Handler(void)
 {
     /* Trigger PendSV to perform a context switch on SysTick. */
-    SCB_ICSR = SCB_ICSR_PENDSVSET_Msk;
+    __trigger_pendsv();
 }
 
 
@@ -132,6 +120,25 @@ void createTask(void (*taskFunction)(void *), const char *name, uint16_t stackSi
     return;
 }
 
+void scheduleNextTask(void)
+{
+    // if (g_currentTask == NULL) {
+    //     return;
+    // }
+    uint8_t i = 0;
+    while(1) {
+        uint32_t next = (g_currentTaskIndex + i);
+        if (g_tasks[next].active && !g_tasks[next].suspended) {
+            g_currentTaskIndex = next;
+            g_currentTask = &g_tasks[next];
+            return;
+        }
+        i++;
+        i%=MAX_TASKS;
+    }
+}
+
+
 void endTask(void)
 {
     if (g_currentTask != NULL) {
@@ -155,7 +162,7 @@ void interruptTask()
         g_currentTask->active = true;
         g_currentTask->suspended = true;
     }
-    yield();
+    __trigger_pendsv();
 }
 
 void resumeTask(TaskIndex index)
@@ -164,10 +171,10 @@ void resumeTask(TaskIndex index)
         g_tasks[index].suspended = false;
         g_tasks[index].active = true;
     }
-    yield();
+    __trigger_pendsv();
 }
 
-void runScheduler(void)
+__attribute__((optimize("O3"))) void runScheduler(void)
 {
     /* Find first active task. */
     g_currentTaskIndex = 0;
@@ -191,7 +198,7 @@ void runScheduler(void)
     SYST_CSR = (1U << 2) | (1U << 1) | (1U << 0); /* CLKSOURCE=1, TICKINT=1, ENABLE=1 */
 
     /* Switch to process stack and start the first task. */
-    setPSP((uint32_t)g_currentTask->stackPointer);
+    __set_PSP((uint32_t)g_currentTask->stackPointer);
     __svc_trigger();
 }
 
