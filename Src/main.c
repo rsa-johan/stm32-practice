@@ -33,7 +33,7 @@ void LedRun0(void *args)
 
     for(;;) {
         led_toggle(LED1);
-        threadDelay(3, DELAY_UNITS_S);
+        threadDelay(1, DELAY_UNITS_S);
     }
 }
 

@@ -144,8 +144,8 @@ void scheduleNextTask(void)
     for (;;) {
         uint32_t completedTasks = 0U;
 
-        for (uint32_t i = 1U; i <= MAX_TASKS; ++i) {
-            uint32_t next = (g_currentTaskIndex + i) % MAX_TASKS;
+        for (uint32_t i = 1U; i <= g_createdTaskCount; ++i) {
+            uint32_t next = (g_currentTaskIndex + i) % g_createdTaskCount;
 
             if (g_tasks[next].state == SUSPENDED && currentTick >= g_tasks[next].endTick) {
                 g_tasks[next].state = ACTIVE;
