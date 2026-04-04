@@ -2,6 +2,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include "thread.h"
+#include "timer.h"
 
 /*
  * Simple cooperative / preemptive round-robin scheduler for Cortex-M3.
@@ -12,9 +13,11 @@
  * - runScheduler() starts SysTick and switches to the first created task.
  */
 
+static Tick currentTick;
 static TaskControlBlock g_tasks[MAX_TASKS];
 static TaskIndex g_currentTaskIndex;
 static TaskControlBlock *g_currentTask;
+static uint32_t g_createdTaskCount;
 
 static uint32_t g_taskStacks[MAX_TASKS][MAX_STACK_WORDS];
 
@@ -32,6 +35,11 @@ static inline void __isb(void)
     __asm volatile("isb");
 }
 
+static inline void __increment_tick(void)
+{
+    currentTick++;
+}
+
 static inline void __svc_trigger(void)
 {
     __asm volatile("SVC #0");
@@ -40,6 +48,11 @@ static inline void __svc_trigger(void)
 static inline void __trigger_pendsv(void)
 {
     SCB_ICSR = SCB_ICSR_PENDSVSET_Msk;
+}
+
+static inline void __wait_for_interrupt(void)
+{
+    __asm volatile("wfi");
 }
 
 __attribute__((optimize("O3"))) void yield(void)
@@ -69,9 +82,9 @@ __attribute__((naked)) void SVC_Handler(void)
 __attribute__((interrupt)) void SysTick_Handler(void)
 {
     /* Trigger PendSV to perform a context switch on SysTick. */
+    __increment_tick();
     __trigger_pendsv();
 }
-
 
 void createTask(void (*taskFunction)(void *), const char *name, uint16_t stackSize, void *parameters, uint32_t priority)
 {
@@ -79,7 +92,7 @@ void createTask(void (*taskFunction)(void *), const char *name, uint16_t stackSi
     (void)priority;
 
     for (uint32_t i = 0; i < MAX_TASKS; ++i) {
-        if (!g_tasks[i].active) {
+        if (!g_tasks[i].state) {
             uint32_t words = (stackSize + 3U) / 4U;
             if (words < 64U) {
                 words = 64U;
@@ -108,10 +121,11 @@ void createTask(void (*taskFunction)(void *), const char *name, uint16_t stackSi
             }
 
             g_tasks[i].stackPointer = stackTop;
-            g_tasks[i].active = true;
-            g_tasks[i].suspended = false;
+            g_tasks[i].state = ACTIVE;
             g_tasks[i].priority = priority;
             g_tasks[i].name = name;
+            g_tasks[i].endTick = 0;
+            g_createdTaskCount++;
 
             return;
         }
@@ -122,19 +136,43 @@ void createTask(void (*taskFunction)(void *), const char *name, uint16_t stackSi
 
 void scheduleNextTask(void)
 {
-    // if (g_currentTask == NULL) {
-    //     return;
-    // }
-    uint8_t i = 0;
-    while(1) {
-        uint32_t next = (g_currentTaskIndex + i);
-        if (g_tasks[next].active && !g_tasks[next].suspended) {
-            g_currentTaskIndex = next;
-            g_currentTask = &g_tasks[next];
+    if (g_createdTaskCount == 0U) {
+        g_currentTask = NULL;
+        return;
+    }
+
+    for (;;) {
+        uint32_t completedTasks = 0U;
+
+        for (uint32_t i = 1U; i <= MAX_TASKS; ++i) {
+            uint32_t next = (g_currentTaskIndex + i) % MAX_TASKS;
+
+            if (g_tasks[next].state == SUSPENDED && currentTick >= g_tasks[next].endTick) {
+                g_tasks[next].state = ACTIVE;
+            }
+
+            switch (g_tasks[next].state) {
+            case ACTIVE:
+                g_currentTaskIndex = next;
+                g_currentTask = &g_tasks[next];
+                return;
+            case SUSPENDED:
+                break;
+            case COMPLETED:
+                completedTasks++;
+                break;
+            case UNUSED:
+            default:
+                break;
+            }
+        }
+
+        if (completedTasks >= g_createdTaskCount) {
+            g_currentTask = NULL;
             return;
         }
-        i++;
-        i%=MAX_TASKS;
+
+        __wait_for_interrupt();
     }
 }
 
@@ -142,8 +180,7 @@ void scheduleNextTask(void)
 void endTask(void)
 {
     if (g_currentTask != NULL) {
-        g_currentTask->active = false;
-        g_currentTask->suspended = false;
+        g_currentTask->state = COMPLETED;
     }
 
     /* Switch to next task; this function should never return. */
@@ -156,20 +193,26 @@ TaskIndex getCurrentTaskIndex(void)
     return g_currentTaskIndex;
 }
 
-void interruptTask()
+void threadDelay(Delay delay_time, delay_units_t unit) 
+{
+    interruptTask(delay_time * unit);
+}
+
+void interruptTask(Delay delay)
 {
     if (g_currentTask != NULL) {
-        g_currentTask->active = true;
-        g_currentTask->suspended = true;
+        g_currentTask->state = SUSPENDED;
+        if (delay > 0){
+            g_currentTask->endTick = currentTick + delay;
+        }
     }
     __trigger_pendsv();
 }
 
 void resumeTask(TaskIndex index)
 {
-    if (index < MAX_TASKS && g_tasks[index].suspended) {
-        g_tasks[index].suspended = false;
-        g_tasks[index].active = true;
+    if (index < MAX_TASKS && g_tasks[index].state == SUSPENDED) {
+        g_tasks[index].state = ACTIVE;
     }
     __trigger_pendsv();
 }
@@ -178,7 +221,9 @@ __attribute__((optimize("O3"))) void runScheduler(void)
 {
     /* Find first active task. */
     g_currentTaskIndex = 0;
-    while (g_currentTaskIndex < MAX_TASKS && (!g_tasks[g_currentTaskIndex].active || g_tasks[g_currentTaskIndex].suspended)) {
+    currentTick = 0;
+    g_currentTask = NULL;
+    while (g_currentTaskIndex < MAX_TASKS && g_tasks[g_currentTaskIndex].state != ACTIVE) {
         g_currentTaskIndex++;
     }
     if (g_currentTaskIndex >= MAX_TASKS) {

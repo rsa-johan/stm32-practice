@@ -1,10 +1,5 @@
-#include "led.h"
-#include "thread.h"
-#include "timer.h"
-#include "nvic.h"
-#include <stdbool.h>
-#include <stdint.h>
 
+#include "timer.h"
 
 static inline nvic_irq_t get_nvic_from_timer(timer_t timer)
 {
@@ -97,16 +92,18 @@ static inline void set_arr(timer_t timer, uint32_t arr)
 {
     TIM_ARR(timer) = arr - 1U;
 }
-    
-void delay(uint32_t delay_time, delay_units_t unit) 
+
+void timer_with_interrupt(timer_t timer, Delay delay_time, delay_units_t unit)
 {
-    TaskIndex currentTaskIndex = getCurrentTaskIndex();
-    timer_t timer = get_timer_from_task_index(currentTaskIndex);
     __reset_timer(timer);
     set_arr(timer,  delay_time * unit);
     enable_timer_interrupt(timer);
     __start_timer(timer);
-    interruptTask();
+}
+    
+void timerDelay(Delay delay_time, delay_units_t unit)
+{
+
 }
 
 void timer_init(void)
@@ -147,7 +144,6 @@ __attribute__((interrupt)) void TIM2_IRQHandler(void)
     timer_t timer = TIM_2;
     disable_timer_interrupt(timer);
     clear_update_interrupt_flag(timer);
-    resumeTask((TaskIndex)0);
 }
 
 __attribute__((interrupt)) void TIM3_IRQHandler(void)
@@ -155,7 +151,6 @@ __attribute__((interrupt)) void TIM3_IRQHandler(void)
     timer_t timer = TIM_3;
     disable_timer_interrupt(timer);
     clear_update_interrupt_flag(timer);
-    resumeTask((TaskIndex)1);
 }
 
 __attribute__((interrupt)) void TIM4_IRQHandler(void)
@@ -163,7 +158,6 @@ __attribute__((interrupt)) void TIM4_IRQHandler(void)
     timer_t timer = TIM_4;
     disable_timer_interrupt(timer);
     clear_update_interrupt_flag(timer);
-    resumeTask((TaskIndex)2);
 }
 
 __attribute__((interrupt)) void TIM5_IRQHandler(void)
@@ -171,7 +165,6 @@ __attribute__((interrupt)) void TIM5_IRQHandler(void)
     timer_t timer = TIM_5;
     disable_timer_interrupt(timer);
     clear_update_interrupt_flag(timer);
-    resumeTask((TaskIndex)3);
 }
 
 

@@ -23,7 +23,6 @@
 #include "led.h"
 #include "thread.h"
 #include "gpio.h"
-#include "timer.h"
 
 void LedRun0(void *args);
 void LedRun1(void *args);
@@ -34,7 +33,7 @@ void LedRun0(void *args)
 
     for(;;) {
         led_toggle(LED1);
-        delay(3, DELAY_UNITS_S);
+        threadDelay(3, DELAY_UNITS_S);
     }
 }
 
@@ -43,7 +42,7 @@ void LedRun1(void *args)
     (void)args;
     for(;;) {
         led_toggle(LED2);
-        delay(3, DELAY_UNITS_S);
+        threadDelay(3, DELAY_UNITS_S);
     }
 }
 
@@ -56,7 +55,6 @@ int main(void)
     rcc_init();
     gpio_init();
     led_init();
-    timer_init();
 
     createTask(LedRun0, "task0", STACK_SIZE, NULL, 1);
     createTask(LedRun1, "task1", STACK_SIZE, NULL, 2);

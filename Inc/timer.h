@@ -5,6 +5,12 @@
 extern "C" {
 #endif
 
+#include "led.h"
+#include "thread.h"
+#include "nvic.h"
+#include <stdbool.h>
+#include <stdint.h>
+
 #define FREQ_HZ 16000U // timer clock freq is 16 MHz -> ms
 
 #define xTIM_CR_OFFSET 0x000U
@@ -31,6 +37,7 @@ extern "C" {
 #define TIM_SR_UIF (1U << 0)
 #define TIM_EGR_UG (1U << 0)
 
+typedef uint32_t Delay;
 typedef enum {
     TIM_2 = 0x0000U,
     TIM_3 = 0x0400U,
@@ -40,16 +47,10 @@ typedef enum {
     TIM_7 = 0x1400U
 } timer_t;
 
-typedef enum {
-    DELAY_UNITS_MS = 1,
-    DELAY_UNITS_S = 1000
-} delay_units_t;
-
 
 void timer_init(void);
 //void delay(uint32_t units, delay_units_t unit, uint8_t has_callback, void *callback_fn);
-void delay(uint32_t units, delay_units_t unit);
-void delay_while(uint32_t units, delay_units_t unit);
+void timerDelay(Delay delay_time, delay_units_t unit);
 
 #ifdef __cplusplus
 }

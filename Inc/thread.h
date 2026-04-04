@@ -23,13 +23,26 @@ extern "C" {
 
 #define CONTROL_nPRIV_Msk (1U << 0) 
 
+typedef uint32_t Delay;
+
 typedef uint32_t TaskIndex;
+typedef uint32_t Tick;
+typedef enum {
+    DELAY_UNITS_MS = 1,
+    DELAY_UNITS_S = 1000
+} delay_units_t;
+typedef enum {
+    UNUSED = 0,
+    ACTIVE = 1,
+    SUSPENDED,
+    COMPLETED
+} TaskState;
 
 typedef struct TaskControlBlock{
     uint32_t *stackPointer;
-    bool active;
-    bool suspended;
     uint32_t priority;
+    TaskState state;
+    Tick endTick;
     const char *name;
 } TaskControlBlock;
 
@@ -44,8 +57,9 @@ void createTask(void (*taskFunction)(void *), const char *name, uint16_t stackSi
 void runScheduler(void);
 
 // timer-level
-void interruptTask(void);
+void interruptTask(Delay delay);
 void resumeTask(TaskIndex index);
+void threadDelay(Delay delay_time, delay_units_t unit);
 
 //task-utils
 TaskIndex getCurrentTaskIndex(void);
