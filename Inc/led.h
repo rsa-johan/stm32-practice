@@ -9,12 +9,11 @@ extern "C" {
 #include "gpio.h"
 
 typedef struct {
-    GPIO_Port port;
-    GPIO_Pin pin;
+    Gpio gpio;
 } LedInfo;
 
-#define LED1 ((LedInfo){PORTG, PIN_9})
-#define LED2 ((LedInfo){PORTF, PIN_11})
+#define LED1 ((LedInfo){GPIO_CONFIG(PORTG, PIN_9, OUTPUT, PUSH_PULL, PULL_DOWN, AF_NONE)})
+#define LED2 ((LedInfo){GPIO_CONFIG(PORTF, PIN_11, OUTPUT, PUSH_PULL, PULL_DOWN, AF_NONE)})
 
 void led_init(void);
 void led_on(LedInfo led);

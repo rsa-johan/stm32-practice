@@ -2,6 +2,8 @@
 #define GPIO_H
 
 #include <stdint.h>
+#include "af.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -11,12 +13,15 @@ extern "C" {
 #define GPIO_BSRR_OFFSET 0x18U
 #define GPIO_OTYPER_OFFSET 0x04U
 #define GPIO_PUPDR_OFFSET 0x0CU
+#define GPIO_AFRL_OFFSET 0x20U
+#define GPIO_AFRH_OFFSET 0x24U
 
 #define GPIO_MODER(port) (*(volatile uint32_t *)((port) + GPIO_MODER_OFFSET))
 #define GPIO_ODR(port) (*(volatile uint32_t *)((port) + GPIO_ODR_OFFSET))
 #define GPIO_BSRR(port) (*(volatile uint32_t *)((port) + GPIO_BSRR_OFFSET))
 #define GPIO_OTYPER(port) (*(volatile uint32_t *)((port) + GPIO_OTYPER_OFFSET))
 #define GPIO_PUPDR(port) (*(volatile uint32_t *)((port) + GPIO_PUPDR_OFFSET))
+#define GPIO_AFR(port, pin) (*(volatile uint32_t *)((port) + ((pin & ~0x07U) ? GPIO_AFRH_OFFSET : GPIO_AFRL_OFFSET))) 
     
 #define GPIO_BASE 0x48000000U
 #define GPIO_PORTA_OFFSET 0x0000U
@@ -82,14 +87,33 @@ typedef enum {
     PIN_HIGH = 1
 } PinState;
 
-void gpio_init(void);
-void gpio_set_pin_mode(GPIO_Port port, GPIO_Pin pin, PinMode mode, PinOutputType outputType, PullUpPullDown pupd);
-void gpio_set_pin_output(GPIO_Port port, GPIO_Pin pin);
-void gpio_clear_pin_output(GPIO_Port port, GPIO_Pin pin);
-void atomic_gpio_set_pin_output(GPIO_Port port, GPIO_Pin pin);
-void atomic_gpio_clear_pin_output(GPIO_Port port, GPIO_Pin pin);
+typedef struct {
+    GPIO_Port port;
+    GPIO_Pin pin;
+    PinMode mode;
+    PinOutputType outputType;
+    PullUpPullDown pull;
+    AF_TYPE alternateFunction;
+} Gpio;
 
-PinState gpio_pin_status(GPIO_Port port, GPIO_Pin pin);
+#define GPIO_CONFIG(port_, pin_, mode_, output_type_, pull_, af_) \
+    ((Gpio){                                                \
+        .port = (port_),                                    \
+        .pin = (pin_),                                      \
+        .mode = (mode_),                                    \
+        .outputType = (output_type_),                       \
+        .pull = (pull_),                                    \
+        .alternateFunction = (af_)                          \
+    })
+
+void gpio_init(void);
+void gpio_set_pin_mode(Gpio gpio);
+void gpio_set_pin_output(Gpio gpio);
+void gpio_clear_pin_output(Gpio gpio);
+void atomic_gpio_set_pin_output(Gpio gpio);
+void atomic_gpio_clear_pin_output(Gpio gpio);
+
+PinState gpio_pin_status(Gpio gpio);
 
 #ifdef __cplusplus
 }
