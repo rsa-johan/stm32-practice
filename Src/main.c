@@ -23,6 +23,7 @@
 #include "led.h"
 #include "thread.h"
 #include "gpio.h"
+#include "i2c.h"
 
 void LedRun0(void *args);
 void LedRun1(void *args);
@@ -54,6 +55,7 @@ int main(void)
     sys_init();
     rcc_init();
     gpio_init();
+    i2c_init();
     led_init();
 
     createTask(LedRun0, "task0", STACK_SIZE, NULL, 1);

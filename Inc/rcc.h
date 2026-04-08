@@ -47,6 +47,12 @@ typedef enum {
 } RCC_TIMER_Timer;
 
 typedef enum {
+    RCC_I2C_1 = 1U << 21,
+    RCC_I2C_2 = 1U << 22,
+    RCC_I2C_3 = 1U << 23,
+} RCC_I2C_Peripheral;
+
+typedef enum {
     RCC_HSI_on = 1U << 8,
     RCC_HSI_ready = 1U << 10,
     RCC_HSE_on = 1U << 16,

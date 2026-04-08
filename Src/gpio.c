@@ -1,23 +1,23 @@
 #include "gpio.h"
 #include "af.h"
 
-static inline void gpio_reset(Gpio gpio);
-static inline void gpio_reset(Gpio gpio)
+static inline void gpio_reset(GPIO gpio);
+static inline void gpio_reset(GPIO gpio)
 {
-    int shift = gpio.pin << 1;
-    GPIO_MODER(gpio.port) |= (ANALOG << shift);
-    uint32_t mode = GPIO_MODER(gpio.port);
+    uint32_t shift = gpio.pin << 1;
+    gpio.port->MODER |= (ANALOG << shift);
+    uint32_t mode = gpio.port->MODER;
     (void)mode;
 }
 
-static inline void gpio_set_pupd(Gpio gpio);
-static inline void gpio_set_pupd(Gpio gpio)
+static inline void gpio_set_pupd(GPIO gpio);
+static inline void gpio_set_pupd(GPIO gpio)
 {
     (void)gpio.pull;
     if (gpio.outputType == OPEN_DRAIN) {
-        GPIO_OTYPER(gpio.port) |= (1U << gpio.pin);
+        gpio.port->OTYPER |= (1U << gpio.pin);
     } else {
-        GPIO_OTYPER(gpio.port) &= ~(1U << gpio.pin);
+        gpio.port->OTYPER &= ~(1U << gpio.pin);
     }
 }
 
@@ -26,16 +26,17 @@ void gpio_init(void)
     /* Implement GPIO initialization here. */
 }
 
-static void gpio_set_af_type(Gpio gpio)
+static void gpio_set_af_type(GPIO gpio)
 {
-    GPIO_AFR(gpio.port, gpio.pin) |= gpio.alternateFunction << ((gpio.pin & 0x07U) << 2);
+    gpio.port->AFR[(gpio.pin >> 3) & 0x01U] |=
+        gpio.alternateFunction << ((gpio.pin & 0x07U) << 2);
 }
 
-void gpio_set_pin_mode(Gpio gpio)
+void gpio_set_pin_mode(GPIO gpio)
 {
     gpio_reset(gpio);
-    GPIO_MODER(gpio.port) &= ~((~gpio.mode & 0x03U) << (gpio.pin << 1));
-    uint32_t pinMode = GPIO_MODER(gpio.port);
+    gpio.port->MODER &= ~((~gpio.mode & 0x03U) << (gpio.pin << 1));
+    uint32_t pinMode = gpio.port->MODER;
     (void)pinMode;
     gpio_set_pupd(gpio);
     if (gpio.mode == ALTERNATE_FUNCTION) {
@@ -44,32 +45,32 @@ void gpio_set_pin_mode(Gpio gpio)
 }
 
 
-PinState gpio_pin_status(Gpio gpio)
+PinState gpio_pin_status(GPIO gpio)
 {
     /* Implement GPIO pin get here. */
-    return (PinState)((GPIO_ODR(gpio.port) & (1U << gpio.pin)) >> gpio.pin); /* Return the state of the pin */
+    return (PinState)((gpio.port->ODR & (1U << gpio.pin)) >> gpio.pin); /* Return the state of the pin */
 }
 
-void gpio_set_pin_output(Gpio gpio)
+void gpio_set_pin_output(GPIO gpio)
 {
     /* Implement GPIO pin set here. */
-    GPIO_ODR(gpio.port) |= (1U << gpio.pin); /* Set the pin */
+    gpio.port->ODR |= (1U << gpio.pin); /* Set the pin */
 }
 
-void gpio_clear_pin_output(Gpio gpio)
+void gpio_clear_pin_output(GPIO gpio)
 {
     /* Implement GPIO pin clear here. */
-    GPIO_ODR(gpio.port) &= ~(1U << gpio.pin); /* Clear the pin */
+    gpio.port->ODR &= ~(1U << gpio.pin); /* Clear the pin */
 }
 
-void atomic_gpio_set_pin_output(Gpio gpio)
+void atomic_gpio_set_pin_output(GPIO gpio)
 {
     /* Implement atomic GPIO pin set here. */
-    GPIO_BSRR(gpio.port) = (1U << gpio.pin); /* Set the pin atomically */
+    gpio.port->BSRR = (1U << gpio.pin); /* Set the pin atomically */
 }
 
-void atomic_gpio_clear_pin_output(Gpio gpio)
+void atomic_gpio_clear_pin_output(GPIO gpio)
 {
     /* Implement atomic GPIO pin clear here. */
-    GPIO_BSRR(gpio.port) = (1U << (gpio.pin + 16U)); /* Clear the pin atomically */
+    gpio.port->BSRR = (1U << (gpio.pin + 16U)); /* Clear the pin atomically */
 }

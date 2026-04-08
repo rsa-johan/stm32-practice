@@ -8,21 +8,6 @@
 extern "C" {
 #endif
 
-#define GPIO_MODER_OFFSET 0x00U
-#define GPIO_ODR_OFFSET 0x14U
-#define GPIO_BSRR_OFFSET 0x18U
-#define GPIO_OTYPER_OFFSET 0x04U
-#define GPIO_PUPDR_OFFSET 0x0CU
-#define GPIO_AFRL_OFFSET 0x20U
-#define GPIO_AFRH_OFFSET 0x24U
-
-#define GPIO_MODER(port) (*(volatile uint32_t *)((port) + GPIO_MODER_OFFSET))
-#define GPIO_ODR(port) (*(volatile uint32_t *)((port) + GPIO_ODR_OFFSET))
-#define GPIO_BSRR(port) (*(volatile uint32_t *)((port) + GPIO_BSRR_OFFSET))
-#define GPIO_OTYPER(port) (*(volatile uint32_t *)((port) + GPIO_OTYPER_OFFSET))
-#define GPIO_PUPDR(port) (*(volatile uint32_t *)((port) + GPIO_PUPDR_OFFSET))
-#define GPIO_AFR(port, pin) (*(volatile uint32_t *)((port) + ((pin & ~0x07U) ? GPIO_AFRH_OFFSET : GPIO_AFRL_OFFSET))) 
-    
 #define GPIO_BASE 0x48000000U
 #define GPIO_PORTA_OFFSET 0x0000U
 #define GPIO_PORTB_OFFSET 0x0400U
@@ -34,6 +19,18 @@ extern "C" {
 
 #define GPIO_C2G_RESET_VALUE 0xFFFFFFFFU
 
+typedef struct {
+    volatile uint32_t MODER;
+    volatile uint32_t OTYPER;
+    volatile uint32_t OSPEEDR;
+    volatile uint32_t PUPDR;
+    volatile uint32_t IDR;
+    volatile uint32_t ODR;
+    volatile uint32_t BSRR;
+    volatile uint32_t LCKR;
+    volatile uint32_t AFR[2];
+    volatile uint32_t BRR;
+} GPIO_Registers;
 
 typedef enum {
     PORTA = GPIO_BASE + GPIO_PORTA_OFFSET,
@@ -88,32 +85,32 @@ typedef enum {
 } PinState;
 
 typedef struct {
-    GPIO_Port port;
+    GPIO_Registers *port;
     GPIO_Pin pin;
     PinMode mode;
     PinOutputType outputType;
     PullUpPullDown pull;
     AF_TYPE alternateFunction;
-} Gpio;
+} GPIO;
 
 #define GPIO_CONFIG(port_, pin_, mode_, output_type_, pull_, af_) \
-    ((Gpio){                                                \
-        .port = (port_),                                    \
-        .pin = (pin_),                                      \
-        .mode = (mode_),                                    \
-        .outputType = (output_type_),                       \
-        .pull = (pull_),                                    \
-        .alternateFunction = (af_)                          \
+    ((GPIO){                                                  \
+        .port = (GPIO_Registers *)(port_),                           \
+        .pin = (pin_),                                               \
+        .mode = (mode_),                                             \
+        .outputType = (output_type_),                                \
+        .pull = (pull_),                                             \
+        .alternateFunction = (af_)                                   \
     })
 
 void gpio_init(void);
-void gpio_set_pin_mode(Gpio gpio);
-void gpio_set_pin_output(Gpio gpio);
-void gpio_clear_pin_output(Gpio gpio);
-void atomic_gpio_set_pin_output(Gpio gpio);
-void atomic_gpio_clear_pin_output(Gpio gpio);
+void gpio_set_pin_mode(GPIO gpio);
+void gpio_set_pin_output(GPIO gpio);
+void gpio_clear_pin_output(GPIO gpio);
+void atomic_gpio_set_pin_output(GPIO gpio);
+void atomic_gpio_clear_pin_output(GPIO gpio);
 
-PinState gpio_pin_status(Gpio gpio);
+PinState gpio_pin_status(GPIO gpio);
 
 #ifdef __cplusplus
 }
