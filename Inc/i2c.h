@@ -37,7 +37,7 @@
 #define I2C_SCL_GPIO GPIO_CONFIG(PORTG, PIN_7, ALTERNATE_FUNCTION, OPEN_DRAIN, NO_PULL, AF_I2C3_SCL)
 
 typedef enum {
-    Audio = 1
+    Audio = 0x34
 } I2C_Slave ;
 
 typedef struct {
