@@ -3,12 +3,17 @@
 
 #include "gpio.h"
 #include "af.h"
+#include "signal.h"
 #include <stdbool.h>
 #include <stdint.h>
 
 #define I2C3_BASE 0x40005C00U
 
 #define I2C_CR1_PE (1U << 0)
+#define I2C_CR1_ANF (1U << 12)
+#define I2C_CR1_NOS (1U << 17)
+#define I2C_CR1_RXIE(enable) (enable << 2)
+#define I2C_CR1_TCIE(enable) (enable << 6)
 
 #define I2C_CR2_SADD_Pos 0U
 #define I2C_CR2_RD_WRN (1U << 10)
@@ -37,15 +42,27 @@
 #define I2C_SCL_GPIO GPIO_CONFIG(PORTG, PIN_7, ALTERNATE_FUNCTION, OPEN_DRAIN, NO_PULL, AF_I2C3_SCL)
 
 typedef enum {
+    Blocking,
+    NonBlocking
+} I2C_RW_T;
+
+typedef enum {
+    Controller,
+    Target,
+} I2C_mode;
+
+typedef enum {
     Audio = 0x34
-} I2C_Slave ;
+} I2C_Slave;
 
 typedef struct {
     GPIO sda;
     GPIO scl;
     I2C_Slave slave;
     uint32_t timing;
-} I2C_Config ;
+    I2C_mode mode;
+    I2C_RW_T non_blocking;
+} I2C_Config;
 
 typedef struct {
     volatile uint32_t CR1;
@@ -64,23 +81,23 @@ typedef struct {
 typedef struct {
     I2C_Registers *registers;
     I2C_Config config;
-} I2C ;
+    __SIG_T (*write_data)(I2C* self, uint8_t data[]);
+    __SIG_T (*read_data)(I2C* self, uint8_t* data);
+    __SIG_T (*setup)(I2C* self);
+} I2C;
 
-#define I2C_CONFIG(slave_, timing_) \
+#define I2C_CONFIG(slave_, timing_, mode_, non_blocking_) \
     ((I2C){                         \
         .registers = (I2C_Registers *)I2C3_BASE, \
         .config = {                 \
             .sda = I2C_SDA_GPIO,    \
             .scl = I2C_SCL_GPIO,    \
             .slave = (slave_),      \
-            .timing = (timing_)     \
+            .timing = (timing_),     \
+            .mode = (mode_)         \
+            .non_blocking = (non_blocking_) \
         }                           \
     })
 
-extern const I2C i2c3;
-
 void i2c_init(void);
-bool i2c_write_reg(I2C_Slave slave, uint8_t reg, uint8_t value);
-bool i2c_read_reg(I2C_Slave slave, uint8_t reg, uint8_t *buffer, uint32_t len);
-
 #endif /* I2C_H */

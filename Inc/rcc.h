@@ -68,7 +68,7 @@ typedef enum {
     RCC_HSI_PRESCALER_DIV_8 = 3U,
 } RCC_HSI_Prescaler;
 
-typedef enum {
+typedef enum: uint32_t {
     RCC_SYSCLK_HSI_on = 1U << 0,
     RCC_SYSCLK_HSE_on = 2U << 0,
     RCC_SYSCLK_PLL_on = 3U << 0,

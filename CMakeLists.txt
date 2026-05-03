@@ -26,7 +26,7 @@ enable_language(C CXX ASM)
 message("Build type: " ${CMAKE_BUILD_TYPE})
 
 # Setup compiler settings
-set(CMAKE_C_STANDARD 11)
+set(CMAKE_C_STANDARD 23)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_C_EXTENSIONS ON)
 set(CMAKE_CXX_STANDARD 20)
@@ -36,8 +36,9 @@ set(CMAKE_CXX_EXTENSIONS ON)
 # Core MCU flags, CPU type, instruction set and FPU setup
 set(cpu_PARAMS 
     # Other parameters
-    # -mthumb
+    -mthumb
     # -mcpu, -mfloat, -mfloat-abi, ...
+    -mgeneral-regs-only
 )
 
 # Sources
@@ -49,6 +50,7 @@ set(sources_SRCS
     ${CMAKE_CURRENT_SOURCE_DIR}/Src/timer.c
     ${CMAKE_CURRENT_SOURCE_DIR}/Src/led.c
     ${CMAKE_CURRENT_SOURCE_DIR}/Src/sys.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/Src/i2c.c
 )
 
 # Include directories for all compilers
