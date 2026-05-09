@@ -1,6 +1,8 @@
 #ifndef AF_H
 #define AF_H
 
+#include <stdint.h>
+
 typedef uint8_t AF_TYPE; 
 
 #define AF_NONE 0x0U
