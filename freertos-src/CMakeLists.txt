@@ -33,11 +33,17 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS ON)
 
+set(STM32_DRIVERS "D:/emus-rom/STM32CubeG4/Drivers" CACHE PATH "Path to stm32 g4 drivers")
+set(STM32_CMSIS ${STM32_DRIVERS}/CMSIS)
+set(STM32_HAL ${STM32_DRIVERS}/STM32G4xx_HAL_Driver)
 
 set(FREE_RTOS_LIB "D:/cmproj/libs/c-ext/FreeRTOSv202604.00-LTS/FreeRTOS-LTS/FreeRTOS/FreeRTOS-Kernel" CACHE PATH "Path to FreeRTOS-Kernel")
 set(FREERTOS_HEAP "4" CACHE STRING "" FORCE)
+# set(FREERTOS_PORT "GCC_ARM_CM4F" CACHE STRING "" FORCE)
+
 set(FREERTOS_PORT "TEMPLATE" CACHE STRING "" FORCE)
 
+add_library(stm32_hal STATIC)
 add_library(freertos_config INTERFACE)
 add_subdirectory(${FREE_RTOS_LIB} FREE_RTOS_BUILD)
 # Core MCU flags, CPU type, instruction set and FPU setup
@@ -52,11 +58,22 @@ set(cpu_PARAMS
 # Sources
 file(GLOB sources_SRCS CONFIGURE_DEPENDS
     ${CMAKE_CURRENT_SOURCE_DIR}/Src/*.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/Src/base/*.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/Src/functions/*.c
+)
+list(APPEND sources_SRCS
+    ${STM32_CMSIS}/Device/ST/STM32G4xx/Source/Templates/system_stm32g4xx.c
+)
+
+file(GLOB hal_SRCS CONFIGURE_DEPENDS
+    ${STM32_HAL}/Src/*.c
 )
 
 # Include directories for all compilers
 set(include_DIRS
 	${CMAKE_CURRENT_SOURCE_DIR}/Inc
+	${CMAKE_CURRENT_SOURCE_DIR}/Inc/base
+	${CMAKE_CURRENT_SOURCE_DIR}/Inc/functions
 )
 
 
@@ -75,7 +92,7 @@ set(symbols_asm_SYMB)
 
 # Link directories and names of libraries
 set(link_DIRS)
-set(link_LIBS freertos_config freertos_kernel)
+set(link_LIBS freertos_config freertos_kernel stm32_hal)
 
 # Linker script
 set(linker_script_SRC)
@@ -97,9 +114,19 @@ add_executable(${CMAKE_PROJECT_NAME})
 target_sources(${CMAKE_PROJECT_NAME} PUBLIC ${sources_SRCS})
 
 # Add include paths
-target_include_directories(freertos_config INTERFACE 
-    ${CMAKE_CURRENT_SOURCE_DIR}/Inc
+target_include_directories(stm32_hal PUBLIC 
+    ${STM32_HAL}/Inc
+    ${STM32_CMSIS}/Device/ST/STM32G4xx/Include
+    ${STM32_CMSIS}/Include
+    ${CMAKE_CURRENT_SOURCE_DIR}/Inc # stm config 
 )
+
+target_sources(stm32_hal PUBLIC ${hal_SRCS})
+
+target_include_directories(freertos_config INTERFACE 
+    ${CMAKE_CURRENT_SOURCE_DIR}/Inc  # freertos config
+)
+
 target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE
     ${include_DIRS}
     $<$<COMPILE_LANGUAGE:C>: ${include_c_DIRS}>
@@ -145,6 +172,19 @@ target_compile_options(${CMAKE_PROJECT_NAME} PRIVATE
     $<$<COMPILE_LANGUAGE:ASM>:-x assembler-with-cpp -MMD -MP>
     $<$<CONFIG:Debug>:-O0 -g3 -ggdb>
     $<$<CONFIG:Release>:-Os>
+)
+
+target_compile_definitions(stm32_hal PUBLIC
+    STM32G474xx
+    USE_HAL_DRIVER
+)
+
+target_compile_options(stm32_hal PRIVATE
+    ${cpu_PARAMS}
+)
+
+target_compile_options(freertos_kernel PRIVATE 
+    ${cpu_PARAMS}
 )
 
 # Linker options
