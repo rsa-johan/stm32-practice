@@ -1,7 +1,7 @@
+#include <stdio.h>
+#include "FreeRTOS.h"
 
-
-
-
-void main(void){
-    for(;;);
+int main(void){
+    printf("Hello world");
+    return 0;
 }

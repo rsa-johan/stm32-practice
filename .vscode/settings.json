@@ -6,9 +6,16 @@
     "cmake.preferredGenerators": [
         "Ninja"
     ],
+    "C_Cpp.default.compileCommands": "${workspaceFolder}/build/rtos-gcc/compile_commands.json",
+    "C_Cpp.default.includePath": [
+        "${workspaceFolder}/freertos-src/Inc",
+        "D:/cmproj/libs/c-ext/FreeRTOSv202604.00-LTS/FreeRTOS-LTS/FreeRTOS/FreeRTOS-Kernel/include",
+        "D:/cmproj/libs/c-ext/FreeRTOSv202604.00-LTS/FreeRTOS-LTS/FreeRTOS/FreeRTOS-Kernel/portable/template"
+    ],
     "stm32cube-ide-clangd.path": "cube",
     "stm32cube-ide-clangd.arguments": [
         "starm-clangd",
+        "--compile-commands-dir=${workspaceFolder}/build/rtos-gcc",
         "--query-driver=${env:CUBE_BUNDLE_PATH}/gnu-tools-for-stm32/14.3.1+st.2/bin/arm-none-eabi-gcc*",
         "--query-driver=${env:CUBE_BUNDLE_PATH}/gnu-tools-for-stm32/14.3.1+st.2/bin/arm-none-eabi-g++*"
     ]

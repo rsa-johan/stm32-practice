@@ -140,7 +140,7 @@ endif()
 # Some default GCC settings
 # arm-none-eabi- must be part of path environment
 set(TOOLCHAIN_PREFIX                arm-none-eabi-)
-set(FLAGS                           "-fdata-sections -ffunction-sections -Wl,--gc-sections -Wno-comment")
+set(FLAGS                           "-fdata-sections -ffunction-sections")
 set(CPP_FLAGS                       "${FLAGS} -fno-rtti -fno-exceptions -fno-threadsafe-statics")
 
 set(CMAKE_C_FLAGS                   ${FLAGS})

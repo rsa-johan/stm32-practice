@@ -33,6 +33,13 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS ON)
 
+
+set(FREE_RTOS_LIB "D:/cmproj/libs/c-ext/FreeRTOSv202604.00-LTS/FreeRTOS-LTS/FreeRTOS/FreeRTOS-Kernel" CACHE PATH "Path to FreeRTOS-Kernel")
+set(FREERTOS_HEAP "4" CACHE STRING "" FORCE)
+set(FREERTOS_PORT "TEMPLATE" CACHE STRING "" FORCE)
+
+add_library(freertos_config INTERFACE)
+add_subdirectory(${FREE_RTOS_LIB} FREE_RTOS_BUILD)
 # Core MCU flags, CPU type, instruction set and FPU setup
 set(cpu_PARAMS 
     # Other parameters
@@ -52,6 +59,7 @@ set(include_DIRS
 	${CMAKE_CURRENT_SOURCE_DIR}/Inc
 )
 
+
 # Include directories for each compiler
 set(include_c_DIRS)
 set(include_cxx_DIRS)
@@ -67,10 +75,10 @@ set(symbols_asm_SYMB)
 
 # Link directories and names of libraries
 set(link_DIRS)
-set(link_LIBS)
+set(link_LIBS freertos_config freertos_kernel)
 
 # Linker script
-set(linker_script_SRC ${CMAKE_CURRENT_SOURCE_DIR}/../c-src/stm32g474xe_flash.ld)
+set(linker_script_SRC)
 
 # Compiler options
 set(compiler_OPTS)
@@ -89,6 +97,9 @@ add_executable(${CMAKE_PROJECT_NAME})
 target_sources(${CMAKE_PROJECT_NAME} PUBLIC ${sources_SRCS})
 
 # Add include paths
+target_include_directories(freertos_config INTERFACE 
+    ${CMAKE_CURRENT_SOURCE_DIR}/Inc
+)
 target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE
     ${include_DIRS}
     $<$<COMPILE_LANGUAGE:C>: ${include_c_DIRS}>
@@ -108,8 +119,10 @@ target_compile_definitions(${CMAKE_PROJECT_NAME} PRIVATE
     $<$<CONFIG:Release>: >
 )
 
+include("cmake/vscode_generated.cmake")
+
 # Add linked libraries
-target_link_libraries(${CMAKE_PROJECT_NAME} ${link_LIBS})
+target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE ${link_LIBS})
 
 # Compiler options
 target_compile_options(${CMAKE_PROJECT_NAME} PRIVATE
