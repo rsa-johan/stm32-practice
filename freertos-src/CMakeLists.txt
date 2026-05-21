@@ -39,20 +39,17 @@ set(STM32_HAL ${STM32_DRIVERS}/STM32G4xx_HAL_Driver)
 
 set(FREE_RTOS_LIB "D:/cmproj/libs/c-ext/FreeRTOSv202604.00-LTS/FreeRTOS-LTS/FreeRTOS/FreeRTOS-Kernel" CACHE PATH "Path to FreeRTOS-Kernel")
 set(FREERTOS_HEAP "4" CACHE STRING "" FORCE)
-# set(FREERTOS_PORT "GCC_ARM_CM4F" CACHE STRING "" FORCE)
+set(FREERTOS_PORT "GCC_ARM_CM4F" CACHE STRING "" FORCE)
 
-set(FREERTOS_PORT "TEMPLATE" CACHE STRING "" FORCE)
+# set(FREERTOS_PORT "TEMPLATE" CACHE STRING "" FORCE)
 
 add_library(stm32_hal STATIC)
 add_library(freertos_config INTERFACE)
 add_subdirectory(${FREE_RTOS_LIB} FREE_RTOS_BUILD)
 # Core MCU flags, CPU type, instruction set and FPU setup
 set(cpu_PARAMS 
-    # Other parameters
-    -mcpu=cortex-m4
     -mthumb
-    # -mcpu, -mfloat, -mfloat-abi, ...
-    -mgeneral-regs-only
+    -mcpu=cortex-m4
 )
 
 # Sources
@@ -184,6 +181,10 @@ target_compile_options(stm32_hal PRIVATE
 )
 
 target_compile_options(freertos_kernel PRIVATE 
+    ${cpu_PARAMS}
+)
+
+target_compile_options(freertos_kernel_port PRIVATE 
     ${cpu_PARAMS}
 )
 

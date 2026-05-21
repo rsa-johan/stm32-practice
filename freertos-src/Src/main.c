@@ -1,12 +1,34 @@
-#include <stdio.h>
-#include "FreeRTOS.h"
 #include "signals.h"
-#include "base/clock.h"
-#include "system_stm32g4xx.h"
+#include "tasks.h"
 
-int main(void)
-{
+#include "base/common.h"
+#include "base/clock.h"
+#include "base/gpio.h"
+
+#include "functions/led.h"
+
+void initialize() {
+    /* System level */
+    HAL_Init();
     SystemInit();
     clock_init();
+
+    /* Base level */
+    gpio_init();
+
+    /* Function level */
+    led_setup();
+
+    /* Tasks */
+    tasks_init();
+}
+
+void run() {
+   vTaskStartScheduler();
+}
+
+int main(void) {
+    initialize();
+    run();
     return 0;
 }
