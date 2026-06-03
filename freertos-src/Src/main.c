@@ -1,5 +1,5 @@
 #include "signals.h"
-#include "tasks.h"
+#include "xmcu_tasks.h"
 
 #include "base/common.h"
 #include "base/clock.h"
@@ -9,8 +9,8 @@
 
 void initialize() {
     /* System level */
-    HAL_Init();
     SystemInit();
+    HAL_Init();
     clock_init();
 
     /* Base level */

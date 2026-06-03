@@ -59,6 +59,7 @@ file(GLOB sources_SRCS CONFIGURE_DEPENDS
     ${CMAKE_CURRENT_SOURCE_DIR}/Src/functions/*.c
 )
 list(APPEND sources_SRCS
+    ${CMAKE_CURRENT_SOURCE_DIR}/Src/startup_stm32g474xx.S
     ${STM32_CMSIS}/Device/ST/STM32G4xx/Source/Templates/system_stm32g4xx.c
 )
 
