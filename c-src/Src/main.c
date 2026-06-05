@@ -47,30 +47,19 @@ void LedRun1(void *args)
     }
 }
 
-// int main(void)
-// {
-//     uint32_t STACK_SIZE = 256;
-//     (void)STACK_SIZE;
+int main(void)
+{
+    uint32_t STACK_SIZE = 256;
+    (void)STACK_SIZE;
 
-//     sys_init();
-//     rcc_init();
-//     gpio_init();
-//     i2c_init();
-//     led_init();
+    sys_init();
+    rcc_init();
+    gpio_init();
+    i2c_init();
+    led_init();
 
-//     createTask(LedRun0, "task0", STACK_SIZE, NULL, 1);
-//     createTask(LedRun1, "task1", STACK_SIZE, NULL, 2);
+    createTask(LedRun0, "task0", STACK_SIZE, NULL, 1);
+    createTask(LedRun1, "task1", STACK_SIZE, NULL, 2);
 
-//     runScheduler();
-// }
-
-int global_init = 5;
-int global_uninit;
-
-int main() {
-    int local = 10;
-    static int static_var = 20;
-    int out_local = local + static_var;
-    local = out_local + global_init;
-    return 0;
+    runScheduler();
 }

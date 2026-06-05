@@ -11,7 +11,7 @@
 extern "C" {
 #endif
 
-#define I2C3_BASE 0x40005C00U
+#define I2C3_BASE 0x40007800U
 
 #define I2C_NBYTES_MAX 255U
 #define I2C_TIMEOUT 100000U

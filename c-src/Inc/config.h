@@ -1,0 +1,4 @@
+#define TD_STACK_SIZE_MAX 2048
+#define TD_STACK_SIZE_MIN 64
+
+#define RTOS_VERSION 1
