@@ -28,7 +28,9 @@ typedef enum {
 } I2C_Mode;
 
 typedef enum {
-    I2C_ADDR_AUDIO = 0x34U,
+    NONE = 0x00U,
+    AUDIO = 0x34U,
+    MFX = 0x66U
 } I2C_Address;
 
 typedef struct {
@@ -73,6 +75,7 @@ typedef struct {
     })
 
 void i2c_init(void);
+I2C i2c_get_device(I2C_Address addr);
 __SIG_T i2c_setup(I2C *dev);
 __SIG_T i2c_write(I2C *dev, const uint8_t *data, uint32_t size);
 __SIG_T i2c_read(I2C *dev, uint8_t *data, uint32_t size);

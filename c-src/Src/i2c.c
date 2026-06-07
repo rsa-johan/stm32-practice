@@ -1,4 +1,5 @@
 #include "i2c.h"
+#include "signal.h"
 
 #define I2C_CR1_PE (1U << 0)
 #define I2C_CR1_RXIE (1U << 2)
@@ -25,11 +26,35 @@
 #define I2C_ICR_STOPCF (1U << 5)
 
 static I2C i2c3_audio = I2C_CONFIG(
-    I2C_ADDR_AUDIO,
+    AUDIO,
     I2C_TIMING_100KHZ_16MHZ,
     I2C_MODE_CONTROLLER,
     false
 );
+
+static I2C i2c3_mfx = I2C_CONFIG(
+    MFX,
+    I2C_TIMING_100KHZ_16MHZ,
+    I2C_MODE_CONTROLLER,
+    false
+);
+
+I2C i2c_get_device(I2C_Address addr)
+{
+    I2C device = {0};
+    switch (addr) {
+        case AUDIO:
+            device = i2c3_audio;
+            break;
+        case MFX:
+            device = i2c3_mfx;
+            break;
+        case NONE:
+            device = {0}
+    }
+
+    return device;
+}
 
 static inline void i2c_disable(I2C_Registers *regs)
 {
@@ -185,7 +210,34 @@ __SIG_T i2c_read(I2C *dev, uint8_t *data, uint32_t size)
     return i2c_finish_transfer(regs, NO_ERROR);
 }
 
+__SIG_T i2c_scan(I2C *dev) {
+    I2C_Registers *regs = dev->registers;
+
+    if (!i2c_wait_clear(regs, I2C_ISR_BUSY)) {
+        return I2C_READ_ERROR;
+    }
+
+    i2c_clear_flags(regs);
+    i2c_start_transfer(dev, 0U, false);
+
+    uint32_t timeout = I2C_TIMEOUT;
+    while ((regs->ISR & (I2C_ISR_STOPF | I2C_ISR_NACKF)) == 0U) {
+        if (timeout-- == 0U) {
+            i2c_clear_flags(regs);
+            return I2C_READ_ERROR;
+        }
+    }
+
+    const __SIG_T result = ((regs->ISR & I2C_ISR_NACKF) == 0U) ? NO_ERROR : I2C_READ_ERROR;
+    i2c_clear_flags(regs);
+    return result;
+}
+
 void i2c_init(void)
 {
     (void)i2c_setup(&i2c3_audio);
+    (void)i2c_setup(&i2c3_mfx);
+
+    (void)i2c_scan(&i2c3_audio);
+    (void)i2c_scan(&i2c3_mfx);
 }

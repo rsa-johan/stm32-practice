@@ -25,26 +25,10 @@
 #include "gpio.h"
 #include "i2c.h"
 
-void LedRun0(void *args);
-void LedRun1(void *args);
+/* Tasks */
 
-void LedRun0(void *args) 
-{
-    (void)args;
-
-    for(;;) {
-        led_toggle(LED1);
-        threadDelay(1, DELAY_UNITS_S);
-    }
-}
-
-void LedRun1(void *args)
-{
-    (void)args;
-    for(;;) {
-        led_toggle(LED2);
-        threadDelay(3, DELAY_UNITS_S);
-    }
+void t_BlinkLed(LedInfo led_info) {
+    led_on(LED3);
 }
 
 int main(void)
@@ -57,9 +41,6 @@ int main(void)
     gpio_init();
     i2c_init();
     led_init();
-
-    createTask(LedRun0, "task0", STACK_SIZE, NULL, 1);
-    createTask(LedRun1, "task1", STACK_SIZE, NULL, 2);
 
     runScheduler();
 }

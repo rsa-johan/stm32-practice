@@ -1,5 +1,4 @@
 #include "led.h"
-#include "gpio.h"
 
 void led_init() {
     gpio_set_pin_mode(LED1.gpio);
@@ -9,10 +8,24 @@ void led_init() {
 }
 
 void led_on(LedInfo led) {
+    if (led.i2c) {
+        uint8_t data = 0;
+        i2c_read(MFX, &data, sizeof(data));
+        data |= 1 << (uint8_t)led.gpio.pin;
+        i2c_write(MFX, &data, sizeof(data));
+        return;
+    }
     atomic_gpio_clear_pin_output(led.gpio);
 }
 
 void led_off(LedInfo led) {
+    if (!led.i2c) {
+        uint8_t data = 0;
+        i2c_read(MFX, &data, sizeof(data));
+        data |= 1 << (uint8_t)led.gpio.pin;
+        i2c_write(MFX, &data, sizeof(data));
+        return;
+    }
     atomic_gpio_set_pin_output(led.gpio);
 }
 
