@@ -7,23 +7,28 @@ void led_init() {
     led_on(LED2);
 }
 
+static inline void set_mfx_led(LedInfo *led, I2C_Address addr, uint8_t *data)
+{
+    I2C dev = i2c_get_device(addr);
+    i2c_read(&dev, data, sizeof(*data));
+    i2c_write(&dev, led->io_expander_config)
+    *data |= (1 << (uint8_t)led->gpio.pin);
+    i2c_write(&dev, data, sizeof(*data));
+}
+
 void led_on(LedInfo led) {
-    if (led.i2c) {
+    if (led.type == Expanded) {
         uint8_t data = 0;
-        i2c_read(MFX, &data, sizeof(data));
-        data |= 1 << (uint8_t)led.gpio.pin;
-        i2c_write(MFX, &data, sizeof(data));
+        set_mfx_led(&led, MFX, &data);
         return;
     }
     atomic_gpio_clear_pin_output(led.gpio);
 }
 
 void led_off(LedInfo led) {
-    if (!led.i2c) {
+    if (led.type == Expanded) {
         uint8_t data = 0;
-        i2c_read(MFX, &data, sizeof(data));
-        data |= 1 << (uint8_t)led.gpio.pin;
-        i2c_write(MFX, &data, sizeof(data));
+        set_mfx_led(&led, MFX, &data);
         return;
     }
     atomic_gpio_set_pin_output(led.gpio);

@@ -27,7 +27,7 @@
 
 /* Tasks */
 
-void t_BlinkLed(LedInfo led_info) {
+void t_BlinkLed() {
     led_on(LED3);
 }
 
@@ -42,5 +42,7 @@ int main(void)
     i2c_init();
     led_init();
 
-    runScheduler();
+    // runScheduler();
+
+    t_BlinkLed();
 }

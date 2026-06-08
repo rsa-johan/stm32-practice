@@ -50,7 +50,7 @@ I2C i2c_get_device(I2C_Address addr)
             device = i2c3_mfx;
             break;
         case NONE:
-            device = {0}
+            break;
     }
 
     return device;
